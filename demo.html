@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Duplicate Detection — Live Demo | Himanshu Suri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        :root {
+            --primary: #00d4aa;
+            --primary-dim: #00d4aa30;
+            --secondary: #00b4d8;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --glow: 0 0 20px #00d4aa40, 0 0 60px #00d4aa15;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --yellow: #eab308;
+            --green: #22c55e;
+            --blue: #3b82f6;
+        }
+        a { color: inherit; text-decoration: none; }
+        ::selection { background: #00d4aa40; color: #fff; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 4px; }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0a0a0fdd;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #ffffff08;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .topbar-back {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .topbar-back:hover {
+            color: #fff;
+            text-shadow: 0 0 8px var(--primary), 0 0 20px var(--primary), 0 0 40px #00d4aa60;
+        }
+        .topbar-back.glow {
+            color: #fff;
+            text-shadow: 0 0 12px var(--primary), 0 0 30px var(--primary), 0 0 60px #00d4aa80;
+            transform: scale(1.06);
+        }
+        .topbar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .topbar-badge {
+            padding: 0.25rem 0.8rem;
+            border: 1px solid var(--primary-dim);
+            border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--primary);
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .demo-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* ===== SUMMARY CARDS ===== */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid #ffffff08;
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        .summary-card:hover {
+            border-color: var(--primary-dim);
+            box-shadow: var(--glow);
+            transform: translateY(-2px);
+        }
+        .summary-card-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .summary-card-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+        }
+        .summary-card-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        /* ===== PIPELINE ===== */
+        .pipeline-section {
+            margin-bottom: 2.5rem;
+        }
+        .pipeline-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+        .pipeline {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+        .pipeline-node {
+            background: var(--bg-card);
+            border: 1px solid #ffffff10;
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+            min-width: 120px;
+            flex-shrink: 0;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .pipeline-node:hover {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+            transform: translateY(-3px);
+        }
+        .pipeline-node.active {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+        }
+        .pipeline-node-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+        .pipeline-node-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .pipeline-node-sub {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        .pipeline-arrow {
+            color: var(--primary);
+            font-size: 1.2rem;
+            padding: 0 0.3rem;
+            opacity: 0.4;
+            flex-shrink: 0;
+        }
+        .pipeline-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            border: 1px solid var(--primary-dim);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            width: 240px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            z-index: 50;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        .pipeline-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1a1a2e;
+        }
+        .pipeline-node:hover .pipeline-tooltip { display: block; }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .filter-pill {
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-card);
+            border: 1px solid #ffffff10;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+        }
+        .filter-pill:hover { border-color: #ffffff30; color: var(--text-primary); }
+        .filter-pill.active {
+            background: var(--primary-dim);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .filter-pill .count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            margin-left: 0.3rem;
+            opacity: 0.7;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            background: var(--bg-card);
+            border: 1px solid #ffffff08;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        thead th {
+            background: #0d0d14;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #ffffff08;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        thead th:hover { color: var(--primary); }
+        thead th .sort-arrow { margin-left: 0.3rem; font-size: 0.65rem; }
+        tbody tr {
+            transition: var(--transition);
+            cursor: pointer;
+            border-bottom: 1px solid #ffffff05;
+        }
+        tbody tr:hover { background: #ffffff06; }
+        tbody tr.hidden { display: none; }
+        tbody td {
+            padding: 0.7rem 1rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+        /* Risk score bar */
+        .risk-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .risk-bar {
+            width: 60px;
+            height: 6px;
+            background: #ffffff10;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .risk-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+        .risk-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            min-width: 24px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.3px;
+        }
+        .badge-p1 { background: #ef444425; color: var(--red); border: 1px solid #ef444440; }
+        .badge-p2 { background: #f59e0b20; color: var(--orange); border: 1px solid #f59e0b40; }
+        .badge-p3 { background: #eab30820; color: var(--yellow); border: 1px solid #eab30840; }
+        .badge-p4 { background: #3b82f620; color: var(--blue); border: 1px solid #3b82f640; }
+        .badge-p5 { background: #22c55e20; color: var(--green); border: 1px solid #22c55e40; }
+        .badge-dup { background: #ef444420; color: var(--red); border: 1px solid #ef444435; }
+        .badge-likely { background: #f59e0b20; color: var(--orange); border: 1px solid #f59e0b35; }
+        .badge-review { background: #eab30820; color: var(--yellow); border: 1px solid #eab30835; }
+        .badge-not { background: #22c55e20; color: var(--green); border: 1px solid #22c55e35; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #12121a;
+            border: 1px solid #ffffff10;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #ffffff08;
+        }
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid #ffffff10;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .modal-close:hover { background: #ffffff10; color: var(--text-primary); }
+        .modal-body { padding: 2rem; }
+
+        .invoice-compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .invoice-panel {
+            background: #0a0a0f;
+            border: 1px solid #ffffff08;
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+        .invoice-panel-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ffffff08;
+        }
+        .invoice-field {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.35rem 0;
+            font-size: 0.82rem;
+        }
+        .invoice-field-label { color: var(--text-muted); }
+        .invoice-field-value { color: var(--text-primary); font-weight: 500; text-align: right; max-width: 60%; }
+        .match-highlight { color: var(--red); font-weight: 700; }
+
+        .ai-review {
+            background: #0a0a0f;
+            border: 1px solid #ffffff08;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .ai-review-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .ai-review-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .confidence-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .confidence-label { font-size: 0.78rem; color: var(--text-muted); min-width: 80px; }
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: #ffffff10;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .confidence-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.8s ease;
+        }
+        .confidence-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 700;
+            min-width: 40px;
+        }
+        .ai-reasoning {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #ffffff04;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+        .ai-signals {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .ai-signal {
+            padding: 0.25rem 0.7rem;
+            background: #ffffff08;
+            border: 1px solid #ffffff0a;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .ai-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .ai-meta-item {
+            font-size: 0.78rem;
+        }
+        .ai-meta-label { color: var(--text-muted); }
+        .ai-meta-value { color: var(--text-primary); font-weight: 600; margin-left: 0.3rem; }
+
+        /* ===== PROCESS SHOWCASE ===== */
+        .showcase-section {
+            margin-bottom: 2.5rem;
+        }
+        .showcase-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+        .showcase-box {
+            background: var(--bg-card);
+            border: 1px solid #ffffff08;
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 380px;
+        }
+        .showcase-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .showcase-play {
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+            background: var(--primary-dim);
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .showcase-play:hover {
+            background: var(--primary);
+            color: #0a0a0f;
+        }
+        .showcase-play:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .showcase-status {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .showcase-progress {
+            width: 100%;
+            height: 3px;
+            background: #ffffff08;
+            border-radius: 2px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .showcase-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        /* Animated canvas */
+        .showcase-stage {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* ERP Row */
+        .erp-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.6s ease;
+        }
+        .erp-row.visible { opacity: 1; transform: translateY(0); }
+        .erp-node {
+            background: #0a0a0f;
+            border: 1px solid #ffffff15;
+            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: var(--transition);
+        }
+        .erp-node.active {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+        }
+        .erp-icon { font-size: 1.1rem; }
+        .erp-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .erp-node.active .erp-name { color: var(--primary); }
+        .erp-feed {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Flow connector */
+        .flow-connector {
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .flow-connector.visible { opacity: 0.5; }
+
+        /* Invoice pair cards */
+        .inv-pair-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0.8rem;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.6s ease;
+        }
+        .inv-pair-row.visible { opacity: 1; transform: scale(1); }
+        .inv-mini {
+            background: #0a0a0f;
+            border: 1px solid #ffffff10;
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-size: 0.78rem;
+            transition: var(--transition);
+        }
+        .inv-mini.highlight {
+            border-color: var(--red);
+            box-shadow: 0 0 15px #ef444430;
+        }
+        .inv-mini-head {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+            font-size: 0.82rem;
+        }
+        .inv-mini-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.15rem 0;
+        }
+        .inv-mini-label { color: var(--text-muted); font-size: 0.72rem; }
+        .inv-mini-val { color: var(--text-secondary); font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; }
+        .inv-mini-val.match { color: var(--red); font-weight: 700; }
+        .inv-vs {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Process step indicators */
+        .proc-steps {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .proc-steps.visible { opacity: 1; }
+        .proc-step {
+            padding: 0.3rem 0.8rem;
+            background: #ffffff08;
+            border: 1px solid #ffffff0a;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            transition: all 0.4s ease;
+        }
+        .proc-step.active {
+            background: var(--primary-dim);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .proc-step.done {
+            background: #22c55e20;
+            border-color: #22c55e40;
+            color: var(--green);
+        }
+
+        /* Score animation */
+        .score-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+        .score-row.visible { opacity: 1; }
+        .score-item {
+            text-align: center;
+        }
+        .score-item-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .score-item-bar {
+            width: 80px;
+            height: 6px;
+            background: #ffffff10;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 auto 0.2rem;
+        }
+        .score-item-fill {
+            height: 100%;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+        .score-item-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Verdict animation */
+        .verdict-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease;
+        }
+        .verdict-row.visible { opacity: 1; transform: scale(1); }
+        .verdict-big {
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: #ef444425;
+            color: var(--red);
+            border: 2px solid #ef444450;
+            animation: pulseGlow 1.5s ease infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px #ef444430; }
+            50% { box-shadow: 0 0 25px #ef444450, 0 0 50px #ef444420; }
+        }
+        .verdict-conf {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .verdict-priority {
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: #ef444425;
+            color: var(--red);
+            border: 1px solid #ef444440;
+        }
+
+        @media (max-width: 700px) {
+            .inv-pair-row { grid-template-columns: 1fr; }
+            .inv-vs { display: none; }
+            .showcase-box { padding: 1.2rem; min-height: 300px; }
+        }
+
+        /* ===== TECH FOOTER ===== */
+        .tech-footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid #ffffff08;
+        }
+        .tech-footer span { color: var(--primary); font-weight: 600; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .summary-row { grid-template-columns: 1fr 1fr; }
+            .invoice-compare { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .summary-row { grid-template-columns: 1fr; }
+            .demo-container { padding: 1rem; }
+            .topbar { padding: 0.6rem 1rem; }
+            .topbar-title { font-size: 0.85rem; }
+            .modal { margin: 1rem; border-radius: 14px; }
+            .modal-body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <a href="index.html" class="topbar-back" onclick="this.classList.add('glow');var t=this;setTimeout(function(){t.classList.remove('glow')},600)">&#8592; Himanshu Suri</a>
+        <span style="color:#ffffff15">|</span>
+        <span class="topbar-title">Invoice Duplicate Detection</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+        <a href="reimbursement-demo.html" style="font-size:0.8rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;transition:var(--transition);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'">Reimbursement Demo &#8594;</a>
+        <span class="topbar-badge">Interactive Demo &bull; Dummy Data</span>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="demo-container">
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-row">
+        <div class="summary-card">
+            <div class="summary-card-label">Total Pairs Flagged</div>
+            <div class="summary-card-value"><span data-count="847">0</span></div>
+            <div class="summary-card-sub">From 14,200 invoices scanned</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">AI Confirmed Duplicates</div>
+            <div class="summary-card-value"><span data-count="234">0</span></div>
+            <div class="summary-card-sub">27.6% confirmation rate</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">Potential Recovery</div>
+            <div class="summary-card-value">$<span data-count="4.2" data-decimal="1">0</span>M</div>
+            <div class="summary-card-sub">Across confirmed duplicates</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">Detection Accuracy</div>
+            <div class="summary-card-value"><span data-count="94.7" data-decimal="1">0</span>%</div>
+            <div class="summary-card-sub">Validated against manual audit</div>
+        </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="pipeline-section">
+        <div class="pipeline-label">Detection Pipeline</div>
+        <div class="pipeline">
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128196;</div>
+                <div class="pipeline-node-name">Raw Invoices</div>
+                <div class="pipeline-node-sub">ERP + Scanned</div>
+                <div class="pipeline-tooltip">Ingest invoices from ERP (SAP, Oracle) and scanned documents via Azure Document Intelligence. Handles PDF, images, and structured data.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128300;</div>
+                <div class="pipeline-node-name">Normalize</div>
+                <div class="pipeline-node-sub">OCR-Aware</div>
+                <div class="pipeline-tooltip">Canonical normalization strips suffixes (CANCEL, REV, DUP), resolves OCR confusables (O&#8596;0, I&#8596;1, B&#8596;8), and extracts numeric runs for fuzzy matching.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128451;</div>
+                <div class="pipeline-node-name">Blocking</div>
+                <div class="pipeline-node-sub">5 Index Types</div>
+                <div class="pipeline-tooltip">Candidate generation via 5 blocking indexes: normalized number, digit-only, canonical base, numeric runs, and vendor+amount bucket. Reduces O(n&sup2;) to O(n&middot;k).</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128202;</div>
+                <div class="pipeline-node-name">Scoring</div>
+                <div class="pipeline-node-sub">Multi-Signal</div>
+                <div class="pipeline-tooltip">Each candidate pair scored on: invoice number similarity (Damerau-Levenshtein + OCR-aware), amount match (incl. FX tolerance), vendor cluster, description overlap, date proximity.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#129504;</div>
+                <div class="pipeline-node-name">AI Review</div>
+                <div class="pipeline-node-sub">LLM + Guardrails</div>
+                <div class="pipeline-tooltip">High-risk pairs reviewed by GPT-4 with forensic audit prompt. Prompt injection protection via sanitization. Response validated against strict schema. Rate-limited with audit trail.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#127919;</div>
+                <div class="pipeline-node-name">Priority Queue</div>
+                <div class="pipeline-node-sub">P1-P5 Routing</div>
+                <div class="pipeline-tooltip">Final priority (P1=critical to P5=dismiss) computed from AI verdict, confidence, risk score, and escalation categories. Cross-vendor fraud always routes to P1.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROCESS SHOWCASE -->
+    <div class="showcase-section">
+        <div class="showcase-label">Watch Detection in Action</div>
+        <div class="showcase-box">
+            <div class="showcase-controls">
+                <button class="showcase-play" id="showcasePlay" onclick="runShowcase()">&#9654; Run Detection</button>
+                <span class="showcase-status" id="showcaseStatus">Click to simulate a live cross-vendor fraud detection</span>
+            </div>
+            <div class="showcase-progress"><div class="showcase-progress-fill" id="showcaseProgress"></div></div>
+            <div class="showcase-stage" id="showcaseStage">
+                <!-- ERP Sources -->
+                <div class="erp-row" id="erpRow">
+                    <div class="erp-node" id="erp1">
+                        <span class="erp-icon">&#128451;</span>
+                        <div><div class="erp-name">SAP S/4HANA</div><div class="erp-feed">ERP Invoices</div></div>
+                    </div>
+                    <span style="color:#ffffff15;font-size:1.2rem;align-self:center">/</span>
+                    <div class="erp-node" id="erp2">
+                        <span class="erp-icon">&#128451;</span>
+                        <div><div class="erp-name">Oracle Fusion</div><div class="erp-feed">AP Module</div></div>
+                    </div>
+                    <span style="color:#ffffff15;font-size:1.2rem;align-self:center">/</span>
+                    <div class="erp-node" id="erp3">
+                        <span class="erp-icon">&#128451;</span>
+                        <div><div class="erp-name">MS Dynamics</div><div class="erp-feed">Vendor Portal</div></div>
+                    </div>
+                    <span style="color:#ffffff15;font-size:1.2rem;align-self:center">/</span>
+                    <div class="erp-node" id="erp4">
+                        <span class="erp-icon">&#128451;</span>
+                        <div><div class="erp-name">Any ERP</div><div class="erp-feed">API / Flat File</div></div>
+                    </div>
+                </div>
+                <div class="flow-connector" id="flowConn1">&#11015; ingesting invoices</div>
+
+                <!-- Invoice Pair -->
+                <div class="inv-pair-row" id="invPairRow">
+                    <div class="inv-mini" id="invA">
+                        <div class="inv-mini-head">Invoice A — SAP ERP</div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Number</span><span class="inv-mini-val" id="invANum">PO-4421-INV</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Vendor</span><span class="inv-mini-val" id="invAVendor">Emirates Facilities Mgmt LLC</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Vendor ID</span><span class="inv-mini-val" id="invAVid">V-0891</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Amount</span><span class="inv-mini-val">$312,000.00</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Status</span><span class="inv-mini-val" style="color:var(--green)">PAID</span></div>
+                    </div>
+                    <div class="inv-vs">
+                        <div>&#128269;</div>
+                        <div style="margin-top:0.3rem">VS</div>
+                    </div>
+                    <div class="inv-mini" id="invB">
+                        <div class="inv-mini-head">Invoice B — Vendor Portal</div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Number</span><span class="inv-mini-val" id="invBNum">PO-4421-INV</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Vendor</span><span class="inv-mini-val" id="invBVendor">EF Services LLC</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Vendor ID</span><span class="inv-mini-val" id="invBVid">V-3402</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Amount</span><span class="inv-mini-val">$312,000.00</span></div>
+                        <div class="inv-mini-row"><span class="inv-mini-label">Status</span><span class="inv-mini-val" style="color:var(--orange)">PENDING</span></div>
+                    </div>
+                </div>
+
+                <!-- Processing steps -->
+                <div class="proc-steps" id="procSteps">
+                    <span class="proc-step" id="ps1">Normalize</span>
+                    <span class="proc-step" id="ps2">Vendor Cluster</span>
+                    <span class="proc-step" id="ps3">Block Index</span>
+                    <span class="proc-step" id="ps4">Score Pair</span>
+                    <span class="proc-step" id="ps5">AI Forensic Review</span>
+                    <span class="proc-step" id="ps6">Escalate</span>
+                </div>
+
+                <!-- Scoring -->
+                <div class="score-row" id="scoreRow">
+                    <div class="score-item">
+                        <div class="score-item-label">Invoice # Match</div>
+                        <div class="score-item-bar"><div class="score-item-fill" id="sf1" style="background:var(--red)"></div></div>
+                        <div class="score-item-val" id="sv1" style="color:var(--red)">—</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-label">Amount Match</div>
+                        <div class="score-item-bar"><div class="score-item-fill" id="sf2" style="background:var(--red)"></div></div>
+                        <div class="score-item-val" id="sv2" style="color:var(--red)">—</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-label">Vendor Name Sim</div>
+                        <div class="score-item-bar"><div class="score-item-fill" id="sf3" style="background:var(--orange)"></div></div>
+                        <div class="score-item-val" id="sv3" style="color:var(--orange)">—</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-label">Desc Overlap</div>
+                        <div class="score-item-bar"><div class="score-item-fill" id="sf4" style="background:var(--red)"></div></div>
+                        <div class="score-item-val" id="sv4" style="color:var(--red)">—</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-label">Fraud Signal</div>
+                        <div class="score-item-bar"><div class="score-item-fill" id="sf5" style="background:var(--red)"></div></div>
+                        <div class="score-item-val" id="sv5" style="color:var(--red)">—</div>
+                    </div>
+                </div>
+
+                <!-- Final verdict -->
+                <div class="verdict-row" id="verdictRow">
+                    <span class="verdict-big">CROSS-VENDOR FRAUD</span>
+                    <span class="verdict-conf">96% confidence</span>
+                    <span class="verdict-priority">P1 — ESCALATE NOW</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+        <button class="filter-pill active" data-filter="all">All<span class="count">12</span></button>
+        <button class="filter-pill" data-filter="P1">P1 Critical<span class="count">3</span></button>
+        <button class="filter-pill" data-filter="P2">P2 High<span class="count">3</span></button>
+        <button class="filter-pill" data-filter="P3">P3 Medium<span class="count">3</span></button>
+        <button class="filter-pill" data-filter="P5">P5 Dismissed<span class="count">3</span></button>
+        <button class="filter-pill" data-filter="DUPLICATE">AI Confirmed<span class="count">4</span></button>
+        <button class="filter-pill" data-filter="NEEDS_REVIEW">Needs Review<span class="count">2</span></button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th data-sort="pair">Pair ID <span class="sort-arrow"></span></th>
+                    <th data-sort="type">Detection Type <span class="sort-arrow"></span></th>
+                    <th data-sort="vendor">Vendor <span class="sort-arrow"></span></th>
+                    <th data-sort="inv1">Invoice 1 <span class="sort-arrow"></span></th>
+                    <th data-sort="inv2">Invoice 2 <span class="sort-arrow"></span></th>
+                    <th data-sort="amount">Amount <span class="sort-arrow"></span></th>
+                    <th data-sort="risk">Risk <span class="sort-arrow"></span></th>
+                    <th data-sort="verdict">AI Verdict <span class="sort-arrow"></span></th>
+                    <th data-sort="priority">Priority <span class="sort-arrow"></span></th>
+                </tr>
+            </thead>
+            <tbody id="pairsBody"></tbody>
+        </table>
+    </div>
+
+    <!-- TECH FOOTER -->
+    <div class="tech-footer">
+        Built with <span>Python</span> &bull; <span>LangGraph</span> &bull; <span>OpenAI Model</span> &bull; <span>React</span> &bull; <span>OCR-Aware Matching</span> &bull; <span>NeMo Guardrails</span> &bull; <span>Anomaly Detection</span>
+    </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Pair Detail</h3>
+            <button class="modal-close" onclick="closeModal()">&#10005;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+/* ===== DUMMY DATA ===== */
+const PAIRS = [
+  {
+    id:"P-000001",type:"Exact Duplicate",vendor:"Al Rashid Contracting",inv1:"INV-2024-08872",inv2:"INV-2024-08872",
+    amount:"$145,200",amount2:"$145,200",risk:95,verdict:"DUPLICATE",priority:"P1",
+    inv1_detail:{number:"INV-2024-08872",vendor:"Al Rashid Contracting LLC",vendor_id:"V-1042",amount:"$145,200.00",currency:"USD",date:"2024-08-14",description:"Structural steel works — Tower B Level 12-15",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    inv2_detail:{number:"INV-2024-08872",vendor:"Al Rashid Contracting LLC",vendor_id:"V-1042",amount:"$145,200.00",currency:"USD",date:"2024-08-14",description:"Structural steel works — Tower B Level 12-15",source:"Email Upload",status:"Posted",payment:"Unpaid"},
+    ai:{confidence:0.97,reasoning:"Exact match on invoice number, vendor, amount, date, and description. The only difference is the source — one entered via SAP, the other uploaded via email. This is a classic double-entry duplicate where the same physical invoice was processed through two channels. High confidence duplicate.",rule:"EXACT_MATCH",signals:["Identical invoice number","Same vendor ID","Same amount","Same date","Different source channels","Identical description"]}
+  },
+  {
+    id:"P-000002",type:"OCR Variant",vendor:"Gulf Building Materials",inv1:"INV-10034",inv2:"INV-1OO34",
+    amount:"$87,500",amount2:"$87,500",risk:91,verdict:"DUPLICATE",priority:"P1",
+    inv1_detail:{number:"INV-10034",vendor:"Gulf Building Materials Co.",vendor_id:"V-2187",amount:"$87,500.00",currency:"USD",date:"2024-07-22",description:"Aluminum cladding panels — Phase 2",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"INV-1OO34",vendor:"Gulf Building Materials Co.",vendor_id:"V-2187",amount:"$87,500.00",currency:"USD",date:"2024-07-23",description:"Aluminum cladding panels — Phase 2",source:"Scanned PDF",status:"Posted",payment:"Unpaid"},
+    ai:{confidence:0.94,reasoning:"Invoice numbers differ only by OCR-confusable characters: '0' (zero) vs 'O' (letter O). After OCR normalization both resolve to the same canonical base. Same vendor, identical amount, descriptions match, dates 1 day apart (likely scan delay). One is already paid — this is a payment-at-risk duplicate.",rule:"OCR_VARIANT",signals:["OCR confusable: 0↔O","Same vendor","Identical amount","1-day date gap","Same description","One already PAID — recovery risk"]}
+  },
+  {
+    id:"P-000003",type:"Cross-Vendor Fraud",vendor:"Emirates Facilities / EF Services",inv1:"PO-4421-INV",inv2:"PO-4421-INV",
+    amount:"$312,000",amount2:"$312,000",risk:98,verdict:"DUPLICATE",priority:"P1",
+    inv1_detail:{number:"PO-4421-INV",vendor:"Emirates Facilities Mgmt LLC",vendor_id:"V-0891",amount:"$312,000.00",currency:"USD",date:"2024-09-02",description:"Annual HVAC maintenance contract",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"PO-4421-INV",vendor:"EF Services LLC",vendor_id:"V-3402",amount:"$312,000.00",currency:"USD",date:"2024-09-05",description:"Annual HVAC maintenance contract",source:"Vendor Portal",status:"Pending Approval",payment:"Unpaid"},
+    ai:{confidence:0.96,reasoning:"CRITICAL: Same invoice number and amount submitted by two different vendor IDs. Vendor name similarity (Emirates Facilities / EF Services) suggests these may be related entities or an intentional split. Same service description. This pattern is consistent with vendor collusion or shell-company fraud. Requires immediate investigation.",rule:"CROSS_VENDOR_FRAUD",signals:["Same invoice number","Different vendor IDs","Vendor name similarity 78%","Identical amount","Same service description","FRAUD RISK — escalate immediately"]}
+  },
+  {
+    id:"P-000004",type:"Cancelled Resubmit",vendor:"National Electrical Works",inv1:"NE-7891",inv2:"NE-7891-CANCEL",
+    amount:"$56,800",amount2:"$56,800",risk:72,verdict:"LIKELY_DUPLICATE",priority:"P2",
+    inv1_detail:{number:"NE-7891",vendor:"National Electrical Works",vendor_id:"V-1567",amount:"$56,800.00",currency:"USD",date:"2024-06-18",description:"Electrical fitout — Retail Units G01-G08",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"NE-7891-CANCEL",vendor:"National Electrical Works",vendor_id:"V-1567",amount:"$56,800.00",currency:"USD",date:"2024-06-20",description:"Electrical fitout — Retail Units G01-G08 [RESUBMIT]",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    ai:{confidence:0.82,reasoning:"Original invoice NE-7891 was paid, then a CANCEL suffix version appeared 2 days later with identical amount. The second invoice description includes [RESUBMIT]. Pattern suggests the vendor cancelled and resubmitted — but original payment was already processed. Likely duplicate payment if both are honored.",rule:"CANCEL_RESUBMIT",signals:["Canonical base match after suffix strip","Original already PAID","CANCEL suffix detected","Same amount","2-day gap","Description contains RESUBMIT"]}
+  },
+  {
+    id:"P-000005",type:"FX Conversion",vendor:"Sunrise Interiors",inv1:"SI-2024-445",inv2:"SI-2024-445-AED",
+    amount:"$23,100",amount2:"AED 84,798",risk:68,verdict:"LIKELY_DUPLICATE",priority:"P2",
+    inv1_detail:{number:"SI-2024-445",vendor:"Sunrise Interiors LLC",vendor_id:"V-0734",amount:"$23,100.00",currency:"USD",date:"2024-08-01",description:"Interior design consultation — Villa Plot 47",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"SI-2024-445-AED",vendor:"Sunrise Interiors LLC",vendor_id:"V-0734",amount:"AED 84,798.00",currency:"AED",date:"2024-08-03",description:"Interior design consultation — Villa Plot 47",source:"Vendor Portal",status:"Pending Approval",payment:"Unpaid"},
+    ai:{confidence:0.85,reasoning:"Same canonical invoice base (SI-2024-445). Amounts in different currencies — $23,100 USD vs AED 84,798. At the standard rate (1 USD = 3.67 AED), $23,100 = AED 84,777 — within 0.02% tolerance. Same vendor, same description. This is the same invoice submitted in both original currency and local currency equivalent.",rule:"FX_CONVERSION",signals:["Same canonical base","FX amounts within 0.02% tolerance","Same vendor","Same description","Different currencies (USD/AED)","2-day date gap"]}
+  },
+  {
+    id:"P-000006",type:"Amount-Anchored",vendor:"Desert Cooling Systems",inv1:"DC-1190",inv2:"DC-1207",
+    amount:"$67,400",amount2:"$67,400",risk:61,verdict:"LIKELY_DUPLICATE",priority:"P3",
+    inv1_detail:{number:"DC-1190",vendor:"Desert Cooling Systems",vendor_id:"V-2290",amount:"$67,400.00",currency:"USD",date:"2024-07-10",description:"Chiller unit supply and installation — Block C",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"DC-1207",vendor:"Desert Cooling Systems",vendor_id:"V-2290",amount:"$67,400.00",currency:"USD",date:"2024-07-28",description:"Chiller unit supply & install — Block C",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    ai:{confidence:0.71,reasoning:"Different invoice numbers but same vendor, identical amount, and highly similar descriptions (92% fuzzy match after normalization). 18-day gap is within range for a re-billing scenario. No numeric run overlap in invoice numbers — these are genuinely different numbers. Could be a re-invoice for the same work, or two separate deliveries at the same price. Merits manual check.",rule:"AMOUNT_ANCHORED",signals:["Same vendor + same amount","Description similarity 92%","Different invoice numbers","18-day date gap","No numeric overlap","Same currency"]}
+  },
+  {
+    id:"P-000007",type:"Recurring Legit",vendor:"City Maintenance Corp",inv1:"CM-M08-2024",inv2:"CM-M09-2024",
+    amount:"$12,500",amount2:"$12,500",risk:15,verdict:"NOT_DUPLICATE",priority:"P5",
+    inv1_detail:{number:"CM-M08-2024",vendor:"City Maintenance Corp",vendor_id:"V-0412",amount:"$12,500.00",currency:"USD",date:"2024-08-01",description:"Monthly facility maintenance — August 2024",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"CM-M09-2024",vendor:"City Maintenance Corp",vendor_id:"V-0412",amount:"$12,500.00",currency:"USD",date:"2024-09-01",description:"Monthly facility maintenance — September 2024",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    ai:{confidence:0.95,reasoning:"Recurring monthly pattern detected: same vendor, same amount, exactly 31 days apart, invoice numbers contain sequential month markers (M08 vs M09), descriptions reference different months. This matches a known recurring contract cadence with 3+ historical occurrences at 28-32 day intervals. False positive — these are separate monthly invoices.",rule:"RECURRING_PATTERN",signals:["Monthly cadence detected","Sequential month markers in invoice #","Different period in description","3+ historical recurrences","Matches known contract pattern"]}
+  },
+  {
+    id:"P-000008",type:"Different Scope",vendor:"Premium Paint Works",inv1:"PP-3310",inv2:"PP-3312",
+    amount:"$41,200",amount2:"$41,200",risk:22,verdict:"NOT_DUPLICATE",priority:"P5",
+    inv1_detail:{number:"PP-3310",vendor:"Premium Paint Works LLC",vendor_id:"V-1823",amount:"$41,200.00",currency:"USD",date:"2024-08-12",description:"External facade painting — Tower A North elevation",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"PP-3312",vendor:"Premium Paint Works LLC",vendor_id:"V-1823",amount:"$41,200.00",currency:"USD",date:"2024-08-19",description:"External facade painting — Tower A South elevation",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    ai:{confidence:0.91,reasoning:"Same vendor and amount, but descriptions clearly indicate different scope: 'North elevation' vs 'South elevation'. Invoice numbers are close but not identical (3310 vs 3312). Same amount is coincidental — facade painting for symmetric elevations would naturally cost the same. These are separate work orders for different building faces.",rule:"DIFFERENT_SCOPE",signals:["Description scope differs: North vs South","Serial invoice numbers (not same)","Same amount is coincidental","7-day gap","Different building elevations"]}
+  },
+  {
+    id:"P-000009",type:"Credit Note Pair",vendor:"Global Supplies Ltd",inv1:"GS-INV-889",inv2:"GS-CN-889",
+    amount:"$29,400",amount2:"-$29,400",risk:12,verdict:"NOT_DUPLICATE",priority:"P5",
+    inv1_detail:{number:"GS-INV-889",vendor:"Global Supplies Ltd",vendor_id:"V-0567",amount:"$29,400.00",currency:"USD",date:"2024-07-05",description:"Office furniture supply — Executive floor",source:"SAP ERP",status:"Posted",payment:"Paid",type:"STANDARD"},
+    inv2_detail:{number:"GS-CN-889",vendor:"Global Supplies Ltd",vendor_id:"V-0567",amount:"-$29,400.00",currency:"USD",date:"2024-07-18",description:"Credit note — returned items from GS-INV-889",source:"SAP ERP",status:"Posted",payment:"N/A",type:"CREDIT MEMO"},
+    ai:{confidence:0.98,reasoning:"Invoice type override applies: GS-CN-889 is a CREDIT MEMO (negative amount) referencing the original invoice GS-INV-889. This is a standard credit/debit chain — the credit note reverses the original charge. Not a duplicate — this is normal accounts payable processing for returned goods.",rule:"CREDIT_CHAIN",signals:["Invoice type: CREDIT MEMO","Negative amount (reversal)","CN references original invoice #","Credit/debit chain linked","Normal AP processing"]}
+  },
+  {
+    id:"P-000010",type:"Serial Sequence",vendor:"Apex Elevators",inv1:"AE-24-100",inv2:"AE-24-101",
+    amount:"$198,000",amount2:"$198,000",risk:52,verdict:"NEEDS_REVIEW",priority:"P3",
+    inv1_detail:{number:"AE-24-100",vendor:"Apex Elevators FZE",vendor_id:"V-3010",amount:"$198,000.00",currency:"USD",date:"2024-09-01",description:"Elevator installation — Shaft 1",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    inv2_detail:{number:"AE-24-101",vendor:"Apex Elevators FZE",vendor_id:"V-3010",amount:"$198,000.00",currency:"USD",date:"2024-09-01",description:"Elevator installation — Shaft 2",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    ai:{confidence:0.45,reasoning:"Consecutive serial invoice numbers (100, 101) from same vendor, same date, identical amounts. Descriptions reference different shafts (Shaft 1 vs Shaft 2). This could be legitimate parallel installations or a billing error. The identical amount for two separate shafts is plausible but warrants verification against the purchase order. Inconclusive — manual review recommended.",rule:"SERIAL_SEQUENCE",signals:["Consecutive invoice numbers","Same vendor + same date","Identical amounts","Different shaft references","Needs PO cross-reference","Inconclusive"]}
+  },
+  {
+    id:"P-000011",type:"Cross-Source",vendor:"Marina Landscaping",inv1:"ML-INV-556",inv2:"ML-556",
+    amount:"$44,750",amount2:"$44,750",risk:82,verdict:"DUPLICATE",priority:"P2",
+    inv1_detail:{number:"ML-INV-556",vendor:"Marina Landscaping LLC",vendor_id:"V-1456",amount:"$44,750.00",currency:"USD",date:"2024-08-20",description:"Landscaping works — Pool deck area",source:"SAP ERP",status:"Posted",payment:"Paid"},
+    inv2_detail:{number:"ML-556",vendor:"Marina Landscaping LLC",vendor_id:"V-1456",amount:"$44,750.00",currency:"USD",date:"2024-08-22",description:"Landscaping works — Pool deck area",source:"Vendor Portal",status:"Pending Approval",payment:"Unpaid"},
+    ai:{confidence:0.92,reasoning:"Invoice numbers have the same canonical base after prefix strip: ML-INV-556 → 556, ML-556 → 556. Same vendor, identical amount and description, submitted via different channels (ERP vs Vendor Portal) 2 days apart. Original already paid. High confidence this is the same invoice entered through two intake channels.",rule:"CROSS_SOURCE",signals:["Same canonical base (556)","Different source channels","Original already PAID","Same vendor + amount","2-day gap","Identical description"]}
+  },
+  {
+    id:"P-000012",type:"Generic Description",vendor:"Royal Brokerage",inv1:"RB-2024-077",inv2:"RB-2024-077",
+    amount:"$88,000",amount2:"$88,000",risk:55,verdict:"NEEDS_REVIEW",priority:"P3",
+    inv1_detail:{number:"RB-2024-077",vendor:"Royal Brokerage Services",vendor_id:"V-2801",amount:"$88,000.00",currency:"USD",date:"2024-09-10",description:"Brokerage commission",source:"SAP ERP",status:"Posted",payment:"Unpaid"},
+    inv2_detail:{number:"RB-2024-077",vendor:"Royal Brokerage Services",vendor_id:"V-2801",amount:"$88,000.00",currency:"USD",date:"2024-09-12",description:"Brokerage commission",source:"Email Upload",status:"Pending Approval",payment:"Unpaid"},
+    ai:{confidence:0.55,reasoning:"Exact invoice number and amount match. However, description is generic ('Brokerage commission') — in real estate, brokers commonly receive identical commissions for different unit transactions under the same reference. Without unit/property details in the description, cannot conclusively determine if this is a duplicate or two legitimate commissions. Same invoice number is suspicious but the generic description makes AI assessment unreliable. Manual review with unit allocation records required.",rule:"SHORT_GENERIC_DESC",signals:["Same invoice number","Generic description: 'Brokerage commission'","Real estate brokerage pattern","Cannot determine unit allocation","2-day date gap","Needs manual unit cross-reference"]}
+  }
+];
+
+/* ===== RENDER TABLE ===== */
+const tbody = document.getElementById('pairsBody');
+
+function riskColor(score) {
+    if (score >= 80) return 'var(--red)';
+    if (score >= 60) return 'var(--orange)';
+    if (score >= 40) return 'var(--yellow)';
+    return 'var(--green)';
+}
+
+function verdictBadge(v) {
+    const map = {
+        'DUPLICATE': ['badge-dup', 'DUPLICATE'],
+        'LIKELY_DUPLICATE': ['badge-likely', 'LIKELY DUP'],
+        'NEEDS_REVIEW': ['badge-review', 'NEEDS REVIEW'],
+        'NOT_DUPLICATE': ['badge-not', 'NOT DUP'],
+    };
+    const [cls, label] = map[v] || ['badge-review', v];
+    return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function priorityBadge(p) {
+    const cls = 'badge-' + p.toLowerCase();
+    return `<span class="badge ${cls}">${p}</span>`;
+}
+
+function renderTable(data) {
+    tbody.innerHTML = data.map(p => `
+        <tr data-id="${p.id}" data-priority="${p.priority}" data-verdict="${p.verdict}">
+            <td class="mono">${p.id}</td>
+            <td>${p.type}</td>
+            <td>${p.vendor}</td>
+            <td class="mono">${p.inv1}</td>
+            <td class="mono">${p.inv2}</td>
+            <td class="mono">${p.amount}</td>
+            <td>
+                <div class="risk-bar-wrap">
+                    <div class="risk-bar"><div class="risk-bar-fill" style="width:${p.risk}%;background:${riskColor(p.risk)}"></div></div>
+                    <span class="risk-value" style="color:${riskColor(p.risk)}">${p.risk}</span>
+                </div>
+            </td>
+            <td>${verdictBadge(p.verdict)}</td>
+            <td>${priorityBadge(p.priority)}</td>
+        </tr>
+    `).join('');
+
+    tbody.querySelectorAll('tr').forEach(tr => {
+        tr.addEventListener('click', () => openModal(tr.dataset.id));
+    });
+}
+
+renderTable(PAIRS);
+
+/* ===== FILTERS ===== */
+document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const filter = pill.dataset.filter;
+
+        tbody.querySelectorAll('tr').forEach(tr => {
+            if (filter === 'all') {
+                tr.classList.remove('hidden');
+            } else if (['P1','P2','P3','P4','P5'].includes(filter)) {
+                tr.classList.toggle('hidden', tr.dataset.priority !== filter);
+            } else {
+                tr.classList.toggle('hidden', tr.dataset.verdict !== filter);
+            }
+        });
+    });
+});
+
+/* ===== SORTING ===== */
+let sortCol = null, sortAsc = true;
+document.querySelectorAll('thead th').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.dataset.sort;
+        if (!col) return;
+        if (sortCol === col) { sortAsc = !sortAsc; }
+        else { sortCol = col; sortAsc = true; }
+
+        const colMap = {pair:0,type:1,vendor:2,inv1:3,inv2:4,amount:5,risk:6,verdict:7,priority:8};
+        const idx = colMap[col];
+        if (idx === undefined) return;
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            let va = a.children[idx].textContent.trim();
+            let vb = b.children[idx].textContent.trim();
+            if (col === 'risk') { va = parseInt(va); vb = parseInt(vb); }
+            if (col === 'amount') { va = parseFloat(va.replace(/[^0-9.-]/g,'')); vb = parseFloat(vb.replace(/[^0-9.-]/g,'')); }
+            if (typeof va === 'number') return sortAsc ? va - vb : vb - va;
+            return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        });
+        rows.forEach(r => tbody.appendChild(r));
+
+        document.querySelectorAll('thead th .sort-arrow').forEach(a => a.textContent = '');
+        th.querySelector('.sort-arrow').textContent = sortAsc ? ' \u25B2' : ' \u25BC';
+    });
+});
+
+/* ===== MODAL ===== */
+const overlay = document.getElementById('modalOverlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+
+function openModal(pairId) {
+    const pair = PAIRS.find(p => p.id === pairId);
+    if (!pair) return;
+
+    modalTitle.textContent = `${pair.id} — ${pair.type}`;
+
+    const d1 = pair.inv1_detail, d2 = pair.inv2_detail, ai = pair.ai;
+    const isMatch = (a, b) => a === b ? 'match-highlight' : '';
+
+    modalBody.innerHTML = `
+        <div class="invoice-compare">
+            <div class="invoice-panel">
+                <div class="invoice-panel-title">Invoice 1 (Current)</div>
+                ${invoiceFields(d1)}
+            </div>
+            <div class="invoice-panel">
+                <div class="invoice-panel-title">Invoice 2 (History)</div>
+                ${invoiceFields(d2, d1)}
+            </div>
+        </div>
+        <div class="ai-review">
+            <div class="ai-review-header">
+                <span class="ai-review-title">AI Forensic Review</span>
+                ${verdictBadge(pair.verdict)}
+            </div>
+            <div class="ai-meta">
+                <div class="ai-meta-item"><span class="ai-meta-label">Detection Rule:</span><span class="ai-meta-value">${ai.rule}</span></div>
+                <div class="ai-meta-item"><span class="ai-meta-label">Risk Score:</span><span class="ai-meta-value" style="color:${riskColor(pair.risk)}">${pair.risk}/100</span></div>
+                <div class="ai-meta-item"><span class="ai-meta-label">Priority:</span><span class="ai-meta-value">${pair.priority}</span></div>
+            </div>
+            <div class="confidence-bar-wrap">
+                <span class="confidence-label">AI Confidence</span>
+                <div class="confidence-bar"><div class="confidence-bar-fill" style="width:${ai.confidence * 100}%"></div></div>
+                <span class="confidence-value">${Math.round(ai.confidence * 100)}%</span>
+            </div>
+            <div class="ai-reasoning">${ai.reasoning}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-weight:600;">Key Signals</div>
+            <div class="ai-signals">
+                ${ai.signals.map(s => `<span class="ai-signal">${s}</span>`).join('')}
+            </div>
+        </div>
+    `;
+
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function invoiceFields(inv, compare) {
+    const fields = [
+        ['Invoice #', 'number'], ['Vendor', 'vendor'], ['Vendor ID', 'vendor_id'],
+        ['Amount', 'amount'], ['Currency', 'currency'], ['Date', 'date'],
+        ['Description', 'description'], ['Source', 'source'],
+        ['Status', 'status'], ['Payment', 'payment']
+    ];
+    if (inv.type) fields.push(['Type', 'type']);
+
+    return fields.map(([label, key]) => {
+        const val = inv[key] || '—';
+        const cls = compare && compare[key] && compare[key] === val && ['number','amount','vendor_id'].includes(key) ? 'match-highlight' : '';
+        return `<div class="invoice-field"><span class="invoice-field-label">${label}</span><span class="invoice-field-value ${cls}">${val}</span></div>`;
+    }).join('');
+}
+
+window.closeModal = function() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+};
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ===== COUNTER ANIMATION ===== */
+document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseFloat(el.dataset.count);
+    const decimal = parseInt(el.dataset.decimal || '0');
+    const duration = 1200;
+    const start = performance.now();
+    function tick(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = (eased * target).toFixed(decimal);
+        if (progress < 1) requestAnimationFrame(tick);
+        else el.textContent = target.toFixed(decimal);
+    }
+    requestAnimationFrame(tick);
+});
+
+/* ===== PROCESS SHOWCASE ANIMATION ===== */
+let showcaseRunning = false;
+const $ = id => document.getElementById(id);
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function setProgress(pct) {
+    $('showcaseProgress').style.width = pct + '%';
+}
+function setStatus(text) {
+    $('showcaseStatus').textContent = text;
+}
+
+function resetShowcase() {
+    // Reset all elements
+    $('erpRow').classList.remove('visible');
+    ['erp1','erp2','erp3','erp4'].forEach(id => $(id).classList.remove('active'));
+    $('flowConn1').classList.remove('visible');
+    $('invPairRow').classList.remove('visible');
+    $('invA').classList.remove('highlight');
+    $('invB').classList.remove('highlight');
+    ['invANum','invBNum','invAVendor','invBVendor','invAVid','invBVid'].forEach(id => {
+        if ($(id)) $(id).classList.remove('match');
+    });
+    $('procSteps').classList.remove('visible');
+    ['ps1','ps2','ps3','ps4','ps5','ps6'].forEach(id => { $(id).classList.remove('active','done'); });
+    $('scoreRow').classList.remove('visible');
+    ['sf1','sf2','sf3','sf4','sf5'].forEach(id => { $(id).style.width = '0%'; });
+    ['sv1','sv2','sv3','sv4','sv5'].forEach(id => { $(id).textContent = '—'; });
+    $('verdictRow').classList.remove('visible');
+    setProgress(0);
+}
+
+window.runShowcase = async function() {
+    if (showcaseRunning) return;
+    showcaseRunning = true;
+    $('showcasePlay').disabled = true;
+    resetShowcase();
+    await delay(300);
+
+    // Step 1: ERP sources light up
+    setStatus('Connecting to ERP systems...');
+    setProgress(5);
+    $('erpRow').classList.add('visible');
+    await delay(500);
+    for (const id of ['erp1','erp2','erp3','erp4']) {
+        $(id).classList.add('active');
+        await delay(300);
+    }
+    setStatus('Ingesting 14,200 invoices from 4 source systems...');
+    setProgress(15);
+    await delay(800);
+
+    // Step 2: Flow connector
+    $('flowConn1').classList.add('visible');
+    setProgress(20);
+    await delay(600);
+
+    // Step 3: Invoice pair surfaces
+    setStatus('Candidate pair surfaced via blocking index...');
+    setProgress(30);
+    $('invPairRow').classList.add('visible');
+    await delay(1000);
+
+    // Step 4: Processing steps
+    setStatus('Running detection pipeline...');
+    $('procSteps').classList.add('visible');
+    setProgress(35);
+    await delay(500);
+
+    // Step 4a: Normalize
+    $('ps1').classList.add('active');
+    setStatus('Normalizing: canonicalizing invoice numbers, stripping prefixes...');
+    setProgress(40);
+    await delay(700);
+    $('invANum').classList.add('match');
+    $('invBNum').classList.add('match');
+    setStatus('Normalize: PO-4421-INV — identical invoice number across both entities');
+    await delay(600);
+    $('ps1').classList.remove('active');
+    $('ps1').classList.add('done');
+
+    // Step 4b: Vendor Cluster
+    $('ps2').classList.add('active');
+    setStatus('Vendor clustering: analyzing entity relationships...');
+    setProgress(48);
+    await delay(600);
+    $('invAVendor').classList.add('match');
+    $('invBVendor').classList.add('match');
+    setStatus('ALERT: "Emirates Facilities Mgmt" ↔ "EF Services" — 78% name similarity, different vendor IDs');
+    $('invAVid').classList.add('match');
+    $('invBVid').classList.add('match');
+    setProgress(55);
+    await delay(1200);
+    $('ps2').classList.remove('active');
+    $('ps2').classList.add('done');
+
+    // Step 4c: Block index
+    $('ps3').classList.add('active');
+    setStatus('Blocking: matched on invoice-number index + amount-bucket index');
+    setProgress(60);
+    await delay(700);
+    $('ps3').classList.remove('active');
+    $('ps3').classList.add('done');
+
+    // Step 4d: Score pair
+    $('ps4').classList.add('active');
+    setStatus('Multi-signal scoring: computing fraud indicators...');
+    setProgress(65);
+    $('scoreRow').classList.add('visible');
+    await delay(400);
+
+    // Animate scores
+    const scores = [
+        {fill:'sf1', val:'sv1', pct:100, label:'EXACT'},
+        {fill:'sf2', val:'sv2', pct:100, label:'$312K'},
+        {fill:'sf3', val:'sv3', pct:78, label:'78%'},
+        {fill:'sf4', val:'sv4', pct:100, label:'100%'},
+        {fill:'sf5', val:'sv5', pct:98, label:'CRITICAL'},
+    ];
+    for (const s of scores) {
+        $(s.fill).style.width = s.pct + '%';
+        $(s.val).textContent = s.label;
+        await delay(350);
+    }
+    setProgress(75);
+    await delay(500);
+    $('ps4').classList.remove('active');
+    $('ps4').classList.add('done');
+
+    // Step 4e: AI Forensic Review
+    $('ps5').classList.add('active');
+    setStatus('AI Forensic Review: invoking LLM with audit prompt + guardrails...');
+    setProgress(80);
+    await delay(700);
+    setStatus('AI: cross-referencing vendor registry, trade license records...');
+    await delay(800);
+    setStatus('AI: "Same invoice billed by two related entities — possible shell company or vendor collusion"');
+    await delay(900);
+    $('invA').classList.add('highlight');
+    $('invB').classList.add('highlight');
+    setStatus('AI verdict: CROSS-VENDOR FRAUD — 96% confidence — Invoice A already PAID $312K');
+    setProgress(90);
+    await delay(600);
+    $('ps5').classList.remove('active');
+    $('ps5').classList.add('done');
+
+    // Step 4f: Escalate
+    $('ps6').classList.add('active');
+    setStatus('Auto-escalation: cross-vendor fraud → P1 Critical → Compliance + Finance notified');
+    setProgress(95);
+    await delay(800);
+    $('ps6').classList.remove('active');
+    $('ps6').classList.add('done');
+
+    // Step 5: Verdict
+    setProgress(100);
+    $('verdictRow').classList.add('visible');
+    setStatus('$312,000 duplicate payment blocked — investigation triggered');
+    await delay(500);
+
+    showcaseRunning = false;
+    $('showcasePlay').disabled = false;
+    $('showcasePlay').innerHTML = '&#8635; Replay';
+};
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Reimbursement Fraud Detection — Live Demo | Himanshu Suri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        :root {
+            --primary: #00d4aa;
+            --primary-dim: #00d4aa30;
+            --secondary: #00b4d8;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --glow: 0 0 20px #00d4aa40, 0 0 60px #00d4aa15;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --yellow: #eab308;
+            --green: #22c55e;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+        }
+        a { color: inherit; text-decoration: none; }
+        ::selection { background: #00d4aa40; color: #fff; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 4px; }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0a0a0fdd;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #ffffff08;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .topbar-back {
+            color: var(--text-secondary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .topbar-back:hover {
+            color: #fff;
+            text-shadow: 0 0 8px var(--primary), 0 0 20px var(--primary), 0 0 40px #00d4aa60;
+        }
+        .topbar-back.glow {
+            color: #fff;
+            text-shadow: 0 0 12px var(--primary), 0 0 30px var(--primary), 0 0 60px #00d4aa80;
+            transform: scale(1.06);
+        }
+        .topbar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .topbar-badge {
+            padding: 0.25rem 0.8rem;
+            border: 1px solid var(--primary-dim);
+            border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--primary);
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .topbar-link {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .topbar-link:hover { color: var(--primary); }
+
+        /* ===== MAIN CONTAINER ===== */
+        .demo-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* ===== SUMMARY CARDS ===== */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid #ffffff08;
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        .summary-card:hover {
+            border-color: var(--primary-dim);
+            box-shadow: var(--glow);
+            transform: translateY(-2px);
+        }
+        .summary-card-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .summary-card-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+        }
+        .summary-card-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        /* ===== PIPELINE ===== */
+        .pipeline-section { margin-bottom: 2.5rem; }
+        .pipeline-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+        .pipeline {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+        .pipeline-node {
+            background: var(--bg-card);
+            border: 1px solid #ffffff10;
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+            min-width: 120px;
+            flex-shrink: 0;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .pipeline-node:hover {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+            transform: translateY(-3px);
+        }
+        .pipeline-node-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+        .pipeline-node-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .pipeline-node-sub {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        .pipeline-arrow {
+            color: var(--primary);
+            font-size: 1.2rem;
+            padding: 0 0.3rem;
+            opacity: 0.4;
+            flex-shrink: 0;
+        }
+        .pipeline-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            border: 1px solid var(--primary-dim);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            width: 250px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            z-index: 50;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        .pipeline-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1a1a2e;
+        }
+        .pipeline-node:hover .pipeline-tooltip { display: block; }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .filter-pill {
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-card);
+            border: 1px solid #ffffff10;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+        }
+        .filter-pill:hover { border-color: #ffffff30; color: var(--text-primary); }
+        .filter-pill.active {
+            background: var(--primary-dim);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .filter-pill .count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            margin-left: 0.3rem;
+            opacity: 0.7;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            background: var(--bg-card);
+            border: 1px solid #ffffff08;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .table-scroll { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        thead th {
+            background: #0d0d14;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #ffffff08;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        thead th:hover { color: var(--primary); }
+        thead th .sort-arrow { margin-left: 0.3rem; font-size: 0.65rem; }
+        tbody tr {
+            transition: var(--transition);
+            cursor: pointer;
+            border-bottom: 1px solid #ffffff05;
+        }
+        tbody tr:hover { background: #ffffff06; }
+        tbody tr.hidden { display: none; }
+        tbody td {
+            padding: 0.7rem 1rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+        /* Risk score bar */
+        .risk-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .risk-bar {
+            width: 60px;
+            height: 6px;
+            background: #ffffff10;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .risk-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+        .risk-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            min-width: 24px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.3px;
+        }
+        .badge-fraud { background: #ef444425; color: var(--red); border: 1px solid #ef444440; }
+        .badge-violation { background: #f59e0b20; color: var(--orange); border: 1px solid #f59e0b40; }
+        .badge-suspicious { background: #eab30820; color: var(--yellow); border: 1px solid #eab30840; }
+        .badge-clean { background: #22c55e20; color: var(--green); border: 1px solid #22c55e40; }
+        .badge-review { background: #a855f720; color: var(--purple); border: 1px solid #a855f740; }
+
+        .badge-ai-gen { background: #ef444420; color: var(--red); border: 1px solid #ef444435; }
+        .badge-duplicate { background: #f59e0b20; color: var(--orange); border: 1px solid #f59e0b35; }
+        .badge-restricted { background: #a855f720; color: var(--purple); border: 1px solid #a855f735; }
+        .badge-policy { background: #eab30820; color: var(--yellow); border: 1px solid #eab30835; }
+        .badge-amount { background: #3b82f620; color: var(--blue); border: 1px solid #3b82f635; }
+        .badge-ok { background: #22c55e20; color: var(--green); border: 1px solid #22c55e35; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #12121a;
+            border: 1px solid #ffffff10;
+            border-radius: 20px;
+            max-width: 960px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #ffffff08;
+        }
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid #ffffff10;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .modal-close:hover { background: #ffffff10; color: var(--text-primary); }
+        .modal-body { padding: 2rem; }
+
+        /* Receipt + Analysis side-by-side */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .detail-panel {
+            background: #0a0a0f;
+            border: 1px solid #ffffff08;
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+        .detail-panel-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ffffff08;
+        }
+        .detail-field {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.35rem 0;
+            font-size: 0.82rem;
+        }
+        .detail-field-label { color: var(--text-muted); }
+        .detail-field-value { color: var(--text-primary); font-weight: 500; text-align: right; max-width: 60%; }
+        .flag-highlight { color: var(--red); font-weight: 700; }
+        .ok-highlight { color: var(--green); font-weight: 600; }
+
+        /* Receipt items breakdown */
+        .receipt-items {
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px dashed #ffffff10;
+        }
+        .receipt-items-title {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            font-size: 0.8rem;
+        }
+        .receipt-item-name { color: var(--text-secondary); }
+        .receipt-item-price { color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+        .receipt-item.flagged .receipt-item-name { color: var(--red); font-weight: 600; }
+        .receipt-item.flagged .receipt-item-price { color: var(--red); }
+        .receipt-item-flag {
+            font-size: 0.65rem;
+            color: var(--red);
+            font-family: 'JetBrains Mono', monospace;
+            margin-left: 0.5rem;
+        }
+        .receipt-totals {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #ffffff10;
+        }
+        .receipt-total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.2rem 0;
+            font-size: 0.8rem;
+        }
+        .receipt-total-row.total {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            padding-top: 0.4rem;
+            margin-top: 0.2rem;
+            border-top: 1px solid #ffffff15;
+        }
+
+        /* AI Analysis */
+        .ai-review {
+            background: #0a0a0f;
+            border: 1px solid #ffffff08;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .ai-review-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .ai-review-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .confidence-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .confidence-label { font-size: 0.78rem; color: var(--text-muted); min-width: 80px; }
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: #ffffff10;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .confidence-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.8s ease;
+        }
+        .confidence-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 700;
+            min-width: 40px;
+        }
+        .ai-reasoning {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #ffffff04;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+        .ai-signals {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .ai-signal {
+            padding: 0.25rem 0.7rem;
+            background: #ffffff08;
+            border: 1px solid #ffffff0a;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .ai-signal.danger {
+            background: #ef444415;
+            border-color: #ef444430;
+            color: var(--red);
+        }
+        .ai-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .ai-meta-item { font-size: 0.78rem; }
+        .ai-meta-label { color: var(--text-muted); }
+        .ai-meta-value { color: var(--text-primary); font-weight: 600; margin-left: 0.3rem; }
+
+        /* ===== PROCESS SHOWCASE ===== */
+        .showcase-section {
+            margin-bottom: 2.5rem;
+        }
+        .showcase-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+        .showcase-box {
+            background: var(--bg-card);
+            border: 1px solid #ffffff08;
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 380px;
+        }
+        .showcase-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .showcase-play {
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+            background: var(--primary-dim);
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .showcase-play:hover {
+            background: var(--primary);
+            color: #0a0a0f;
+        }
+        .showcase-play:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .showcase-status {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .showcase-progress {
+            width: 100%;
+            height: 3px;
+            background: #ffffff08;
+            border-radius: 2px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .showcase-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+        .showcase-stage {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Source Row */
+        .src-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.6s ease;
+        }
+        .src-row.visible { opacity: 1; transform: translateY(0); }
+        .src-node {
+            background: #0a0a0f;
+            border: 1px solid #ffffff15;
+            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: var(--transition);
+        }
+        .src-node.active {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+        }
+        .src-icon { font-size: 1.1rem; }
+        .src-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .src-node.active .src-name { color: var(--primary); }
+        .src-feed {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Flow connector */
+        .sc-flow {
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .sc-flow.visible { opacity: 0.5; }
+
+        /* Receipt card */
+        .receipt-showcase {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #0a0a0f;
+            border: 1px solid #ffffff10;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.6s ease;
+        }
+        .receipt-showcase.visible { opacity: 1; transform: scale(1); }
+        .receipt-showcase.flagged {
+            border-color: var(--red);
+            box-shadow: 0 0 20px #ef444430;
+        }
+        .receipt-showcase-head {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .receipt-showcase-badge {
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            background: #22c55e20;
+            color: var(--green);
+            border: 1px solid #22c55e40;
+            transition: all 0.4s ease;
+        }
+        .receipt-showcase-badge.fraud {
+            background: #ef444425;
+            color: var(--red);
+            border-color: #ef444450;
+            animation: pulseGlow 1.5s ease infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px #ef444430; }
+            50% { box-shadow: 0 0 25px #ef444450, 0 0 50px #ef444420; }
+        }
+        .receipt-sc-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.2rem 0;
+            font-size: 0.76rem;
+        }
+        .receipt-sc-label { color: var(--text-muted); }
+        .receipt-sc-val { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; }
+        .receipt-sc-val.alert { color: var(--red); font-weight: 700; }
+
+        /* Process steps */
+        .sc-proc-steps {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .sc-proc-steps.visible { opacity: 1; }
+        .sc-proc-step {
+            padding: 0.3rem 0.8rem;
+            background: #ffffff08;
+            border: 1px solid #ffffff0a;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            transition: all 0.4s ease;
+        }
+        .sc-proc-step.active {
+            background: var(--primary-dim);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .sc-proc-step.done {
+            background: #22c55e20;
+            border-color: #22c55e40;
+            color: var(--green);
+        }
+        .sc-proc-step.fail {
+            background: #ef444420;
+            border-color: #ef444440;
+            color: var(--red);
+        }
+
+        /* Forensic scores */
+        .forensic-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+        .forensic-row.visible { opacity: 1; }
+        .forensic-item { text-align: center; }
+        .forensic-item-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .forensic-item-bar {
+            width: 70px;
+            height: 6px;
+            background: #ffffff10;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 auto 0.2rem;
+        }
+        .forensic-item-fill {
+            height: 100%;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+        .forensic-item-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        /* Verdict */
+        .sc-verdict-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease;
+            flex-wrap: wrap;
+        }
+        .sc-verdict-row.visible { opacity: 1; transform: scale(1); }
+        .sc-verdict-big {
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: #ef444425;
+            color: var(--red);
+            border: 2px solid #ef444450;
+            animation: pulseGlow 1.5s ease infinite;
+        }
+        .sc-verdict-conf {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .sc-verdict-action {
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: #ef444425;
+            color: var(--red);
+            border: 1px solid #ef444440;
+        }
+
+        @media (max-width: 700px) {
+            .showcase-box { padding: 1.2rem; min-height: 300px; }
+            .receipt-showcase { max-width: 100%; }
+        }
+
+        /* ===== TECH FOOTER ===== */
+        .tech-footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid #ffffff08;
+        }
+        .tech-footer span { color: var(--primary); font-weight: 600; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .summary-row { grid-template-columns: 1fr 1fr; }
+            .detail-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .summary-row { grid-template-columns: 1fr; }
+            .demo-container { padding: 1rem; }
+            .topbar { padding: 0.6rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+            .topbar-title { font-size: 0.85rem; }
+            .modal { margin: 1rem; border-radius: 14px; }
+            .modal-body { padding: 1rem; }
+            .topbar-right { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <a href="index.html" class="topbar-back" onclick="this.classList.add('glow');var t=this;setTimeout(function(){t.classList.remove('glow')},600)">&#8592; Himanshu Suri</a>
+        <span style="color:#ffffff15">|</span>
+        <span class="topbar-title">Employee Reimbursement Fraud Detection</span>
+    </div>
+    <div class="topbar-right">
+        <a href="demo.html" class="topbar-link">Invoice Duplicates Demo &#8594;</a>
+        <span class="topbar-badge">Interactive Demo &bull; Dummy Data</span>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="demo-container">
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-row">
+        <div class="summary-card">
+            <div class="summary-card-label">Claims Audited (100%)</div>
+            <div class="summary-card-value"><span data-count="4832">0</span></div>
+            <div class="summary-card-sub">Every single claim AI-reviewed in real time</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">AI-Fake Receipts Caught</div>
+            <div class="summary-card-value"><span data-count="47">0</span></div>
+            <div class="summary-card-sub">14% of fraud is now AI-generated receipts</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">Policy Violations Blocked</div>
+            <div class="summary-card-value"><span data-count="218">0</span></div>
+            <div class="summary-card-sub">Restricted items, over-limits, personal expenses</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-card-label">Fraud Prevented</div>
+            <div class="summary-card-value">$<span data-count="1.2" data-decimal="1">0</span>M</div>
+            <div class="summary-card-sub">Avg $50K per scheme caught before payout</div>
+        </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="pipeline-section">
+        <div class="pipeline-label">AI Fraud Detection Pipeline &mdash; 100% Automated Audit</div>
+        <div class="pipeline">
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128206;</div>
+                <div class="pipeline-node-name">Ingest</div>
+                <div class="pipeline-node-sub">SAP / Fusion / Any</div>
+                <div class="pipeline-tooltip">Receipts ingested from expense portals (Concur, SAP, Oracle Fusion), mobile apps, email, and scanned documents. EXIF metadata (GPS, timestamp, device ID) captured. Supports 40+ languages across 97 countries.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128196;</div>
+                <div class="pipeline-node-name">OCR + LLM Parse</div>
+                <div class="pipeline-node-sub">Document AI</div>
+                <div class="pipeline-tooltip">Document Intelligence extracts structured fields. LLM contextually understands what's on the receipt — not just text, but meaning: identifying hidden charges, miscategorized items, and non-standard line items. Handles thermal, handwritten, and low-quality scans.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128270;</div>
+                <div class="pipeline-node-name">Digital Forensics</div>
+                <div class="pipeline-node-sub">AI-Fake Detection</div>
+                <div class="pipeline-tooltip">Multi-layer authenticity: (1) Computer vision detects GAN/diffusion artifacts, pixel uniformity, and synthetic noise patterns. (2) EXIF metadata validation — missing GPS/device data flags fake uploads. (3) Digital fingerprinting matches against known AI receipt templates. (4) Merchant registry cross-reference. AI-fake receipts rose from 0% to 14% of fraud in 2025.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128220;</div>
+                <div class="pipeline-node-name">Policy Engine</div>
+                <div class="pipeline-node-sub">Rules + NLP</div>
+                <div class="pipeline-tooltip">Validates against live company policy: per-diem caps, restricted categories (alcohol, tobacco, entertainment, spa), weekend/holiday claims, receipt age limits, split-transaction detection, location vs. itinerary matching, and Benford's Law distribution checks on amounts.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128101;</div>
+                <div class="pipeline-node-name">Behavioral AI</div>
+                <div class="pipeline-node-sub">Baseline Deviation</div>
+                <div class="pipeline-tooltip">Per-employee behavioral model tracks: spending patterns vs. peer group, frequency anomalies, merchant preferences, timing patterns, and geolocation consistency. Flags deviations from established baselines — catching gradual escalation patterns human auditors miss.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128269;</div>
+                <div class="pipeline-node-name">Duplicate + Collusion</div>
+                <div class="pipeline-node-sub">Graph Analysis</div>
+                <div class="pipeline-tooltip">Image hashing + fuzzy matching + graph-based network analysis: detects same receipt across employees (collusion rings), split transactions to bypass limits, resubmitted rejected claims, and cross-report duplicates. Graph methods reveal hidden relationships between claimants and merchants.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#128202;</div>
+                <div class="pipeline-node-name">Risk Scoring</div>
+                <div class="pipeline-node-sub">Ensemble Model</div>
+                <div class="pipeline-tooltip">Stacking ensemble (Isolation Forest + XGBoost + Neural Network) scores 0-100. Features: amount vs. peer average, merchant price validation against known databases, Benford's Law conformity, historical flag rate, behavioral deviation score, and 40+ engineered signals.</div>
+            </div>
+            <div class="pipeline-arrow">&#10132;</div>
+            <div class="pipeline-node">
+                <div class="pipeline-node-icon">&#127919;</div>
+                <div class="pipeline-node-name">Auto-Triage</div>
+                <div class="pipeline-node-sub">99% No-Touch</div>
+                <div class="pipeline-tooltip">Intelligent routing: auto-approve clean claims (99% processed without human touch), auto-reject confirmed fraud, escalate policy violations to managers, and queue suspicious patterns for audit. Full AI reasoning audit trail for every decision. Finance dashboard with drill-down analytics.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROCESS SHOWCASE -->
+    <div class="showcase-section">
+        <div class="showcase-label">Watch AI-Fake Detection in Action</div>
+        <div class="showcase-box">
+            <div class="showcase-controls">
+                <button class="showcase-play" id="showcasePlay" onclick="runShowcase()">&#9654; Run Detection</button>
+                <span class="showcase-status" id="showcaseStatus">Click to simulate live AI-generated receipt detection</span>
+            </div>
+            <div class="showcase-progress"><div class="showcase-progress-fill" id="showcaseProgress"></div></div>
+            <div class="showcase-stage" id="showcaseStage">
+                <!-- Receipt Sources -->
+                <div class="src-row" id="srcRow">
+                    <div class="src-node" id="src1">
+                        <span class="src-icon">&#128241;</span>
+                        <div><div class="src-name">SAP Concur</div><div class="src-feed">Expense Portal</div></div>
+                    </div>
+                    <span style="color:#ffffff15;font-size:1.2rem;align-self:center">/</span>
+                    <div class="src-node" id="src2">
+                        <span class="src-icon">&#128451;</span>
+                        <div><div class="src-name">Oracle Fusion</div><div class="src-feed">AP Module</div></div>
+                    </div>
+                    <span style="color:#ffffff15;font-size:1.2rem;align-self:center">/</span>
+                    <div class="src-node" id="src3">
+                        <span class="src-icon">&#128247;</span>
+                        <div><div class="src-name">Mobile Upload</div><div class="src-feed">Photo / Scan</div></div>
+                    </div>
+                    <span style="color:#ffffff15;font-size:1.2rem;align-self:center">/</span>
+                    <div class="src-node" id="src4">
+                        <span class="src-icon">&#128231;</span>
+                        <div><div class="src-name">Email / Any</div><div class="src-feed">PDF / Image</div></div>
+                    </div>
+                </div>
+                <div class="sc-flow" id="scFlow1">&#11015; receipt submitted for reimbursement</div>
+
+                <!-- Receipt Card -->
+                <div class="receipt-showcase" id="receiptCard">
+                    <div class="receipt-showcase-head">
+                        <span>EXP-2024-0847 &mdash; Raj Mehta (Sales)</span>
+                        <span class="receipt-showcase-badge" id="receiptBadge">SCANNING</span>
+                    </div>
+                    <div class="receipt-sc-row"><span class="receipt-sc-label">Merchant</span><span class="receipt-sc-val" id="rcMerchant">The Grand Kitchen</span></div>
+                    <div class="receipt-sc-row"><span class="receipt-sc-label">Date</span><span class="receipt-sc-val">2024-09-12</span></div>
+                    <div class="receipt-sc-row"><span class="receipt-sc-label">Amount</span><span class="receipt-sc-val">AED 82.50</span></div>
+                    <div class="receipt-sc-row"><span class="receipt-sc-label">Category</span><span class="receipt-sc-val">Client Dinner</span></div>
+                    <div class="receipt-sc-row"><span class="receipt-sc-label">EXIF Data</span><span class="receipt-sc-val" id="rcExif">Checking...</span></div>
+                    <div class="receipt-sc-row"><span class="receipt-sc-label">Merchant Registry</span><span class="receipt-sc-val" id="rcRegistry">Checking...</span></div>
+                </div>
+
+                <!-- Processing Steps -->
+                <div class="sc-proc-steps" id="scProcSteps">
+                    <span class="sc-proc-step" id="sps1">OCR Extract</span>
+                    <span class="sc-proc-step" id="sps2">Digital Forensics</span>
+                    <span class="sc-proc-step" id="sps3">EXIF Validate</span>
+                    <span class="sc-proc-step" id="sps4">Merchant Check</span>
+                    <span class="sc-proc-step" id="sps5">AI-Fake Model</span>
+                    <span class="sc-proc-step" id="sps6">Flag &amp; Triage</span>
+                </div>
+
+                <!-- Forensic Scores -->
+                <div class="forensic-row" id="forensicRow">
+                    <div class="forensic-item">
+                        <div class="forensic-item-label">Paper Texture</div>
+                        <div class="forensic-item-bar"><div class="forensic-item-fill" id="ff1" style="background:var(--red)"></div></div>
+                        <div class="forensic-item-val" id="fv1" style="color:var(--red)">&mdash;</div>
+                    </div>
+                    <div class="forensic-item">
+                        <div class="forensic-item-label">EXIF Metadata</div>
+                        <div class="forensic-item-bar"><div class="forensic-item-fill" id="ff2" style="background:var(--red)"></div></div>
+                        <div class="forensic-item-val" id="fv2" style="color:var(--red)">&mdash;</div>
+                    </div>
+                    <div class="forensic-item">
+                        <div class="forensic-item-label">Merchant DB</div>
+                        <div class="forensic-item-bar"><div class="forensic-item-fill" id="ff3" style="background:var(--red)"></div></div>
+                        <div class="forensic-item-val" id="fv3" style="color:var(--red)">&mdash;</div>
+                    </div>
+                    <div class="forensic-item">
+                        <div class="forensic-item-label">Fingerprint</div>
+                        <div class="forensic-item-bar"><div class="forensic-item-fill" id="ff4" style="background:var(--red)"></div></div>
+                        <div class="forensic-item-val" id="fv4" style="color:var(--red)">&mdash;</div>
+                    </div>
+                    <div class="forensic-item">
+                        <div class="forensic-item-label">Font Metrics</div>
+                        <div class="forensic-item-bar"><div class="forensic-item-fill" id="ff5" style="background:var(--red)"></div></div>
+                        <div class="forensic-item-val" id="fv5" style="color:var(--red)">&mdash;</div>
+                    </div>
+                </div>
+
+                <!-- Final Verdict -->
+                <div class="sc-verdict-row" id="scVerdictRow">
+                    <span class="sc-verdict-big">AI-GENERATED RECEIPT</span>
+                    <span class="sc-verdict-conf">96% confidence</span>
+                    <span class="sc-verdict-action">FRAUD &mdash; REJECT &amp; ESCALATE</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+        <button class="filter-pill active" data-filter="all">All<span class="count">16</span></button>
+        <button class="filter-pill" data-filter="AI_GENERATED">AI-Generated<span class="count">2</span></button>
+        <button class="filter-pill" data-filter="DUPLICATE">Duplicate<span class="count">2</span></button>
+        <button class="filter-pill" data-filter="RESTRICTED_ITEM">Restricted Items<span class="count">2</span></button>
+        <button class="filter-pill" data-filter="POLICY_VIOLATION">Policy Violation<span class="count">4</span></button>
+        <button class="filter-pill" data-filter="SUSPICIOUS">Suspicious<span class="count">3</span></button>
+        <button class="filter-pill" data-filter="CLEAN">Clean<span class="count">3</span></button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+        <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th data-sort="id">Claim ID <span class="sort-arrow"></span></th>
+                    <th data-sort="employee">Employee <span class="sort-arrow"></span></th>
+                    <th data-sort="merchant">Merchant <span class="sort-arrow"></span></th>
+                    <th data-sort="category">Category <span class="sort-arrow"></span></th>
+                    <th data-sort="amount">Amount <span class="sort-arrow"></span></th>
+                    <th data-sort="flag">Flag Type <span class="sort-arrow"></span></th>
+                    <th data-sort="risk">Risk <span class="sort-arrow"></span></th>
+                    <th data-sort="verdict">AI Verdict <span class="sort-arrow"></span></th>
+                </tr>
+            </thead>
+            <tbody id="claimsBody"></tbody>
+        </table>
+        </div>
+    </div>
+
+    <!-- TECH FOOTER -->
+    <div class="tech-footer">
+        Built with <span>Python</span> &bull; <span>Azure OpenAI</span> &bull; <span>Document Intelligence</span> &bull; <span>Computer Vision</span> &bull; <span>Digital Forensics</span> &bull; <span>Behavioral Analytics</span> &bull; <span>Graph Analysis</span> &bull; <span>XGBoost</span> &bull; <span>Benford's Law</span> &bull; <span>React</span>
+    </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Claim Detail</h3>
+            <button class="modal-close" onclick="closeModal()">&#10005;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+/* ===== DUMMY DATA ===== */
+const CLAIMS = [
+  {
+    id:"EXP-2024-0847", employee:"Raj Mehta", dept:"Sales", merchant:"The Grand Kitchen", category:"Meals", amount:82.50, flag:"AI_GENERATED", risk:94,
+    verdict:"FRAUD", verdictLabel:"FRAUDULENT",
+    receipt: {
+      merchant:"The Grand Kitchen", date:"2024-09-12", time:"19:45", address:"Al Wasl Road, Dubai",
+      items:[
+        {name:"Grilled Salmon Fillet", qty:1, price:38.00, flagged:false},
+        {name:"Caesar Salad", qty:1, price:18.50, flagged:false},
+        {name:"Sparkling Water (750ml)", qty:2, price:7.00, flagged:false},
+        {name:"Tiramisu", qty:1, price:12.00, flagged:false}
+      ],
+      subtotal:82.50, tax:0, tip:0, total:82.50, payment:"Corporate Card ****4821"
+    },
+    ai:{confidence:0.96, reasoning:"Digital forensics flagged this receipt as AI-generated (GPT-4o/Gemini image output pattern). Key indicators: (1) Pixel-perfect uniformity — no paper texture variance, grain, or thermal printer artifacts. Real receipts show micro-variations in ink density. (2) Digital fingerprint matches known AI receipt generation signature (diffusion model artifact pattern in background noise). (3) 'The Grand Kitchen' does not exist in the UAE commercial registry or Google Places API. (4) EXIF metadata completely absent — genuine phone photos always include device ID, GPS coordinates, and capture timestamp. (5) Font metrics are synthetically perfect — real POS printers produce measurable character spacing variance. AI-fake receipts rose from 0% to 14% of expense fraud in 2025 — this is a textbook case.",
+      rule:"AI_RECEIPT_DETECTION", signals:["Diffusion model artifacts","No paper texture variance","Merchant not in registry","EXIF metadata absent","Digital fingerprint match","Font metrics synthetically perfect"]}
+  },
+  {
+    id:"EXP-2024-0851", employee:"Sarah Al Maktoum", dept:"Marketing", merchant:"Café Blanc Bistro", category:"Meals", amount:67.00, flag:"AI_GENERATED", risk:88,
+    verdict:"FRAUD", verdictLabel:"FRAUDULENT",
+    receipt: {
+      merchant:"Café Blanc Bistro", date:"2024-09-14", time:"13:20", address:"DIFC, Gate Avenue, Dubai",
+      items:[
+        {name:"Wagyu Burger", qty:1, price:28.00, flagged:false},
+        {name:"Truffle Fries", qty:1, price:15.00, flagged:false},
+        {name:"Fresh Orange Juice", qty:1, price:12.00, flagged:false},
+        {name:"Crème Brûlée", qty:1, price:12.00, flagged:false}
+      ],
+      subtotal:67.00, tax:0, tip:0, total:67.00, payment:"Personal Card Reimbursement"
+    },
+    ai:{confidence:0.91, reasoning:"Multiple authenticity red flags detected. (1) Receipt layout matches a known AI-generated receipt template (Template ID: CafeBistro-v3) circulated on expense fraud forums. (2) The merchant 'Café Blanc Bistro' exists but closed operations in March 2024 — 6 months before the claimed date. (3) Receipt serial number format doesn't match the merchant's actual POS system (Lightspeed). (4) Tax field shows 0% — UAE F&B establishments are required to display the 5% VAT. Recommended: escalate for formal investigation.",
+      rule:"AI_RECEIPT_DETECTION", signals:["Matches known fake template","Merchant closed 6 months prior","Invalid POS serial format","Missing VAT (required)","Template ID: CafeBistro-v3"]}
+  },
+  {
+    id:"EXP-2024-0903", employee:"Ahmad Farooq", dept:"Operations", merchant:"Hilton Dubai Creek", category:"Hotel", amount:890.00, flag:"DUPLICATE", risk:91,
+    verdict:"FRAUD", verdictLabel:"DUPLICATE",
+    receipt: {
+      merchant:"Hilton Dubai Creek", date:"2024-08-22", time:"14:00", address:"Baniyas Road, Deira, Dubai",
+      items:[
+        {name:"Deluxe Room (1 night)", qty:1, price:750.00, flagged:false},
+        {name:"Room Service — Dinner", qty:1, price:95.00, flagged:false},
+        {name:"Minibar", qty:1, price:45.00, flagged:false}
+      ],
+      subtotal:890.00, tax:0, tip:0, total:890.00, payment:"Corporate Card ****7732"
+    },
+    ai:{confidence:0.97, reasoning:"Exact duplicate detection: this receipt (hash: a3f8c2d) was previously submitted as EXP-2024-0761 on 2024-08-28 and approved/paid. Same image file, same total, same line items. The employee resubmitted the identical receipt in a new expense report 3 weeks later, likely hoping it would not be cross-referenced. The original claim was paid to the corporate card, and this resubmission requests reimbursement to personal account — a double-payment attempt.",
+      rule:"EXACT_DUPLICATE", signals:["Image hash match: a3f8c2d","Previously paid as EXP-2024-0761","Same file resubmitted","Different payment destination","Double-payment attempt"]}
+  },
+  {
+    id:"EXP-2024-0912", employee:"Priya Sharma", dept:"HR", merchant:"Dubai Marina Restaurant", category:"Meals", amount:156.40, flag:"RESTRICTED_ITEM", risk:72,
+    verdict:"VIOLATION", verdictLabel:"POLICY BREACH",
+    receipt: {
+      merchant:"Dubai Marina Restaurant", date:"2024-09-18", time:"20:30", address:"Marina Walk, Dubai Marina",
+      items:[
+        {name:"Mixed Grill Platter (x2)", qty:2, price:42.00, flagged:false},
+        {name:"Hummus & Bread", qty:1, price:12.00, flagged:false},
+        {name:"Grilled Prawns", qty:1, price:28.00, flagged:false},
+        {name:"Heineken Beer (330ml)", qty:2, price:9.00, flagged:true},
+        {name:"Red Wine — Merlot (glass)", qty:2, price:14.20, flagged:true},
+        {name:"Soft Drinks", qty:2, price:6.00, flagged:false}
+      ],
+      subtotal:156.40, tax:0, tip:0, total:156.40, payment:"Personal Card Reimbursement"
+    },
+    ai:{confidence:0.99, reasoning:"Line-item classification detected 2 restricted categories: (1) 'Heineken Beer (330ml)' x2 @ AED 9.00 each — classified as ALCOHOL. (2) 'Red Wine — Merlot (glass)' x2 @ AED 14.20 each — classified as ALCOHOL. Company policy explicitly prohibits reimbursement of alcoholic beverages (Policy HR-EXP-007, Section 4.2). Total restricted amount: AED 46.40. Recommendation: approve AED 110.00 (food items only), reject AED 46.40 (alcohol).",
+      rule:"RESTRICTED_ITEM_ALCOHOL", signals:["Beer detected — ALCOHOL","Wine detected — ALCOHOL","Policy HR-EXP-007 violation","Restricted amount: AED 46.40","Partial approval recommended","Food items: AED 110.00"]}
+  },
+  {
+    id:"EXP-2024-0934", employee:"Omar Hassan", dept:"Procurement", merchant:"Al Raha Grocery & More", category:"Supplies", amount:214.80, flag:"RESTRICTED_ITEM", risk:85,
+    verdict:"VIOLATION", verdictLabel:"POLICY BREACH",
+    receipt: {
+      merchant:"Al Raha Grocery & More", date:"2024-09-20", time:"17:15", address:"Sheikh Zayed Rd, Abu Dhabi",
+      items:[
+        {name:"Printer Paper A4 (5 reams)", qty:5, price:12.00, flagged:false},
+        {name:"Whiteboard Markers (pack)", qty:2, price:8.00, flagged:false},
+        {name:"Marlboro Gold (carton)", qty:1, price:65.00, flagged:true},
+        {name:"Disposable Lighters (3pk)", qty:1, price:5.80, flagged:true},
+        {name:"Energy Drinks (case of 12)", qty:1, price:48.00, flagged:false},
+        {name:"Vape Cartridge — Mint", qty:2, price:18.00, flagged:true}
+      ],
+      subtotal:214.80, tax:0, tip:0, total:214.80, payment:"Petty Cash"
+    },
+    ai:{confidence:0.98, reasoning:"Multiple restricted items detected in a mixed office supplies purchase. (1) 'Marlboro Gold (carton)' — classified as TOBACCO (AED 65.00). (2) 'Disposable Lighters (3pk)' — flagged as TOBACCO_ACCESSORY, commonly co-purchased with tobacco (AED 5.80). (3) 'Vape Cartridge — Mint' x2 — classified as TOBACCO/NICOTINE product (AED 36.00). Total restricted: AED 106.80 (49.7% of claim). Pattern note: this employee has had 3 prior restricted item flags in last 90 days. Escalating to compliance.",
+      rule:"RESTRICTED_ITEM_TOBACCO", signals:["Cigarettes detected — TOBACCO","Vape cartridges — NICOTINE","Lighters — TOBACCO_ACCESSORY","49.7% of claim is restricted","3 prior flags in 90 days","Escalate to compliance"]}
+  },
+  {
+    id:"EXP-2024-0956", employee:"Lisa Chen", dept:"Finance", merchant:"Nobu Restaurant Dubai", category:"Meals", amount:347.00, flag:"POLICY_VIOLATION", risk:68,
+    verdict:"VIOLATION", verdictLabel:"OVER LIMIT",
+    receipt: {
+      merchant:"Nobu Restaurant Dubai", date:"2024-09-22", time:"20:00", address:"Atlantis, The Palm",
+      items:[
+        {name:"Black Cod Miso", qty:2, price:62.00, flagged:false},
+        {name:"Yellowtail Sashimi", qty:1, price:48.00, flagged:false},
+        {name:"Rock Shrimp Tempura", qty:1, price:42.00, flagged:false},
+        {name:"Wagyu Tataki", qty:1, price:55.00, flagged:false},
+        {name:"Bento Box", qty:1, price:38.00, flagged:false},
+        {name:"Green Tea (pot)", qty:2, price:10.00, flagged:false},
+        {name:"Mochi Ice Cream (3pc)", qty:2, price:15.00, flagged:false}
+      ],
+      subtotal:347.00, tax:0, tip:0, total:347.00, payment:"Corporate Card ****3356"
+    },
+    ai:{confidence:0.88, reasoning:"Claim exceeds per-person meal allowance. Expense report states 'Client dinner — 2 attendees' giving per-person cost of AED 173.50. Company policy (HR-EXP-003) caps client entertainment meals at AED 120 per person. Overage: AED 53.50/person (AED 107 total). Additionally, Nobu at Atlantis is classified as a luxury venue — meals here have been flagged for review per the 2024 expense policy update. No restricted items detected. Recommendation: approve up to AED 240 (2 x AED 120 cap), require justification for the remaining AED 107.",
+      rule:"MEAL_LIMIT_EXCEEDED", signals:["Per-person: AED 173.50","Policy cap: AED 120/person","Overage: AED 107 total","Luxury venue flag","Client dinner — 2 attendees","Partial approval: AED 240"]}
+  },
+  {
+    id:"EXP-2024-0978", employee:"Vikram Patel", dept:"IT", merchant:"Holiday Inn Express", category:"Hotel", amount:420.00, flag:"POLICY_VIOLATION", risk:62,
+    verdict:"SUSPICIOUS", verdictLabel:"NEEDS REVIEW",
+    receipt: {
+      merchant:"Holiday Inn Express", date:"2024-09-07", time:"15:00", address:"Internet City, Dubai",
+      items:[
+        {name:"Standard Room (1 night)", qty:1, price:350.00, flagged:false},
+        {name:"Late Checkout Fee", qty:1, price:70.00, flagged:false}
+      ],
+      subtotal:420.00, tax:0, tip:0, total:420.00, payment:"Personal Card Reimbursement"
+    },
+    ai:{confidence:0.74, reasoning:"Weekend stay with no matching travel authorization. Date (Sept 7, 2024) falls on a Saturday. Employee's travel records show no approved business trip for this period. Hotel location (Internet City) is 3.2km from the employee's registered home address. Pattern: employee has submitted 2 other weekend hotel claims in the past quarter. Without a matching travel request or event approval, this claim cannot be validated. Routing to manager for justification.",
+      rule:"WEEKEND_NO_AUTHORIZATION", signals:["Saturday — non-working day","No travel authorization","Hotel near home address (3.2km)","2 prior weekend hotel claims","No matching event/conference","Manager approval required"]}
+  },
+  {
+    id:"EXP-2024-0990", employee:"Ahmad Farooq", dept:"Operations", merchant:"Carrefour", category:"Supplies", amount:100.00, flag:"SUSPICIOUS", risk:71,
+    verdict:"SUSPICIOUS", verdictLabel:"NEEDS REVIEW",
+    receipt: {
+      merchant:"Carrefour", date:"2024-09-24", time:"11:30", address:"Mall of the Emirates, Dubai",
+      items:[
+        {name:"Office Supplies — Miscellaneous", qty:1, price:100.00, flagged:false}
+      ],
+      subtotal:100.00, tax:0, tip:0, total:100.00, payment:"Petty Cash"
+    },
+    ai:{confidence:0.69, reasoning:"Multiple anomaly signals: (1) Exact round amount (AED 100.00) — statistically improbable for a grocery/supplies receipt with itemized purchases. (2) Single generic line item 'Office Supplies — Miscellaneous' instead of itemized products — Carrefour POS always prints itemized receipts. (3) Receipt image quality is unusually low — possible photocopy or screenshot of an edited receipt. (4) This employee was previously flagged for a duplicate submission (EXP-2024-0903). Behavioral pattern suggests elevated risk. Recommend requesting the original itemized receipt.",
+      rule:"ROUND_AMOUNT_ANOMALY", signals:["Exact round amount: AED 100","Single generic line item","Carrefour always itemizes","Low image quality","Prior fraud flag on record","Request original receipt"]}
+  },
+  {
+    id:"EXP-2024-1002", employee:"Nadia Al Suwaidi", dept:"Legal", merchant:"Shangri-La Dubai", category:"Meals", amount:95.00, flag:"CLEAN", risk:8,
+    verdict:"CLEAN", verdictLabel:"APPROVED",
+    receipt: {
+      merchant:"Shangri-La Hotel Dubai", date:"2024-09-25", time:"12:30", address:"Sheikh Zayed Road, Dubai",
+      items:[
+        {name:"Business Lunch Set Menu", qty:1, price:65.00, flagged:false},
+        {name:"Fresh Juice", qty:1, price:18.00, flagged:false},
+        {name:"Espresso", qty:1, price:12.00, flagged:false}
+      ],
+      subtotal:95.00, tax:0, tip:0, total:95.00, payment:"Corporate Card ****9102"
+    },
+    ai:{confidence:0.97, reasoning:"All checks passed. (1) Receipt authenticity confirmed — paper texture, font variance, and POS format match Shangri-La's known receipt template. (2) Amount within single-person meal allowance (AED 95 < AED 120 cap). (3) Weekday lunch, within business hours. (4) No restricted items. (5) Corporate card used — matches employee's assigned card. (6) Merchant verified in commercial registry. (7) No duplicate hashes found. Auto-approved.",
+      rule:"ALL_CHECKS_PASSED", signals:["Authenticity verified","Within meal cap","Weekday business hours","No restricted items","Corporate card match","Merchant verified","No duplicates"]}
+  },
+  {
+    id:"EXP-2024-1015", employee:"James Wright", dept:"Sales", merchant:"Costa Coffee", category:"Meals", amount:34.50, flag:"CLEAN", risk:5,
+    verdict:"CLEAN", verdictLabel:"APPROVED",
+    receipt: {
+      merchant:"Costa Coffee", date:"2024-09-26", time:"09:15", address:"DIFC Gate Village, Dubai",
+      items:[
+        {name:"Flat White (Large)", qty:2, price:9.50, flagged:false},
+        {name:"Croissant", qty:2, price:5.00, flagged:false},
+        {name:"Bottled Water", qty:1, price:5.50, flagged:false}
+      ],
+      subtotal:34.50, tax:0, tip:0, total:34.50, payment:"Corporate Card ****5501"
+    },
+    ai:{confidence:0.99, reasoning:"Standard client coffee meeting expense. All validations passed: receipt authentic (Costa Coffee POS verified), amount well within daily meal cap, weekday morning meeting, no restricted items, corporate card matches employee record. Expense description 'Client meeting — coffee' aligns with the receipt. Auto-approved.",
+      rule:"ALL_CHECKS_PASSED", signals:["Authenticity verified","Well within limits","Weekday morning","No flags","Card verified"]}
+  },
+  {
+    id:"EXP-2024-1023", employee:"Fatima Khalid", dept:"Admin", merchant:"The Spa at Address", category:"Personal", amount:580.00, flag:"POLICY_VIOLATION", risk:82,
+    verdict:"VIOLATION", verdictLabel:"PERSONAL EXPENSE",
+    receipt: {
+      merchant:"The Spa at Address Downtown", date:"2024-09-21", time:"14:00", address:"Address Downtown, Dubai",
+      items:[
+        {name:"Deep Tissue Massage (90min)", qty:1, price:350.00, flagged:true},
+        {name:"Facial Treatment — Hydra", qty:1, price:180.00, flagged:true},
+        {name:"Herbal Tea Service", qty:1, price:50.00, flagged:true}
+      ],
+      subtotal:580.00, tax:0, tip:0, total:580.00, payment:"Personal Card Reimbursement"
+    },
+    ai:{confidence:0.95, reasoning:"Merchant category classified as SPA/WELLNESS — this falls under personal expenses, not reimbursable business expenses (Policy HR-EXP-001, Section 2.1). Expense description submitted as 'Client wellness event' but: (1) no client name provided, (2) no event approval in system, (3) Saturday date — no business events scheduled, (4) single attendee. All line items are personal wellness services. This is a personal expense submitted as a business claim. Recommend: reject in full, flag for policy briefing.",
+      rule:"PERSONAL_EXPENSE_DETECTED", signals:["SPA/WELLNESS merchant category","No client name provided","No event approval","Saturday — non-business day","Single attendee","Full rejection recommended"]}
+  },
+  {
+    id:"EXP-2024-1031", employee:"Tom Baker", dept:"Consulting", merchant:"Emirates Suites Hotel", category:"Hotel", amount:1240.00, flag:"SUSPICIOUS", risk:76,
+    verdict:"SUSPICIOUS", verdictLabel:"NEEDS REVIEW",
+    receipt: {
+      merchant:"Emirates Suites Hotel", date:"2024-09-15", time:"Check-in", address:"JBR, Dubai",
+      items:[
+        {name:"Suite Room (2 nights)", qty:1, price:1100.00, flagged:false},
+        {name:"Breakfast Buffet (x2)", qty:2, price:45.00, flagged:false},
+        {name:"Valet Parking (2 days)", qty:1, price:50.00, flagged:false}
+      ],
+      subtotal:1240.00, tax:0, tip:0, total:1240.00, payment:"Personal Card Reimbursement"
+    },
+    ai:{confidence:0.70, reasoning:"OCR analysis detected potential amount tampering. (1) The total field shows pixel-level inconsistency around the '1' digit in '1240' — possible overwrite from original value. (2) Font weight of '1' differs from other digits (bolder, slight offset). (3) Original receipt total may have been '240.00' with '1' prepended. (4) Receipt paper shows compression artifacts localized around the total area only. (5) Room rate of AED 550/night for a JBR suite is plausible, but the visual anomaly warrants verification. Recommend: request hotel folio directly from the property for cross-reference.",
+      rule:"AMOUNT_TAMPERING", signals:["Pixel inconsistency at total","Font weight mismatch on '1'","Possible digit prepending","Localized compression artifacts","Request hotel folio directly","Cross-reference required"]}
+  },
+  {
+    id:"EXP-2024-1044", employee:"Raj Mehta", dept:"Sales", merchant:"Various", category:"Meals", amount:74.50, flag:"DUPLICATE", risk:78,
+    verdict:"FRAUD", verdictLabel:"CROSS-EMPLOYEE",
+    receipt: {
+      merchant:"Texas Roadhouse", date:"2024-09-19", time:"19:30", address:"Festival City Mall, Dubai",
+      items:[
+        {name:"BBQ Combo Platter", qty:1, price:38.00, flagged:false},
+        {name:"Loaded Potato Skins", qty:1, price:16.50, flagged:false},
+        {name:"Iced Tea", qty:2, price:10.00, flagged:false}
+      ],
+      subtotal:74.50, tax:0, tip:0, total:74.50, payment:"Personal Card Reimbursement"
+    },
+    ai:{confidence:0.93, reasoning:"Cross-employee duplicate detected. This exact receipt (image hash: d7b4e1a, total: AED 74.50, merchant: Texas Roadhouse, date: 2024-09-19) was also submitted by Priya Sharma (HR dept) as EXP-2024-0945. Both employees claim it as a solo business dinner on the same date. Image hashes match — it is the same physical receipt photo. This pattern suggests: (1) receipt sharing/collusion between employees, or (2) one legitimate diner and one fraudulent claim. Both submissions flagged. HR investigation recommended.",
+      rule:"CROSS_EMPLOYEE_DUPLICATE", signals:["Image hash match: d7b4e1a","Same receipt from Priya Sharma","Both claim solo dinner","Same date + same merchant","Receipt sharing/collusion","HR investigation flagged"]}
+  },
+  {
+    id:"EXP-2024-1058", employee:"Karen Mitchell", dept:"Marketing", merchant:"Park Hyatt Dubai", category:"Meals", amount:89.00, flag:"CLEAN", risk:12,
+    verdict:"CLEAN", verdictLabel:"APPROVED",
+    receipt: {
+      merchant:"Park Hyatt Dubai", date:"2024-09-27", time:"13:00", address:"Dubai Creek Golf & Yacht Club",
+      items:[
+        {name:"Thai Set Lunch", qty:1, price:55.00, flagged:false},
+        {name:"Coconut Water", qty:1, price:14.00, flagged:false},
+        {name:"Green Tea Pot", qty:1, price:20.00, flagged:false}
+      ],
+      subtotal:89.00, tax:0, tip:0, total:89.00, payment:"Corporate Card ****8810"
+    },
+    ai:{confidence:0.98, reasoning:"All checks passed. Verified receipt from Park Hyatt Dubai — POS format and logo confirmed. Amount AED 89 within per-person meal cap (AED 120). Weekday lunch, corporate card on file, no restricted items, no duplicate hashes, matching travel/meeting record found in calendar. Auto-approved.",
+      rule:"ALL_CHECKS_PASSED", signals:["Authenticity verified","Within meal cap","Calendar match found","No restricted items","Corporate card verified","No duplicates"]}
+  },
+  {
+    id:"EXP-2024-1067", employee:"Vikram Patel", dept:"IT", merchant:"Multiple Restaurants", category:"Meals", amount:72.00, flag:"POLICY_VIOLATION", risk:79,
+    verdict:"VIOLATION", verdictLabel:"SPLIT TRANSACTION",
+    receipt: {
+      merchant:"Nando's Dubai Mall", date:"2024-09-28", time:"19:45", address:"Dubai Mall, Downtown Dubai",
+      items:[
+        {name:"Whole Chicken Platter", qty:1, price:48.00, flagged:false},
+        {name:"Sides Combo", qty:1, price:24.00, flagged:false}
+      ],
+      subtotal:72.00, tax:0, tip:0, total:72.00, payment:"Personal Card Reimbursement"
+    },
+    ai:{confidence:0.89, reasoning:"Split transaction pattern detected. This employee submitted 3 separate claims on the same date (Sept 28) from restaurants within the same mall: EXP-2024-1067 (AED 72), EXP-2024-1068 (AED 65), and EXP-2024-1069 (AED 58). Combined total: AED 195 — which exceeds the AED 120 single-meal cap and the AED 150 daily meal allowance. Receipts are timestamped within 40 minutes of each other. Behavioral model flagged: this pattern deviates from employee's historical single-receipt submissions. This is a classic split-transaction tactic to circumvent per-claim thresholds.",
+      rule:"SPLIT_TRANSACTION", signals:["3 claims same date + same mall","Combined: AED 195 > daily cap","40-min window between receipts","Exceeds per-claim threshold","Behavioral baseline deviation","Classic split tactic"]}
+  },
+  {
+    id:"EXP-2024-1075", employee:"Omar Hassan", dept:"Procurement", merchant:"Mileage Claim", category:"Transport", amount:248.00, flag:"SUSPICIOUS", risk:73,
+    verdict:"SUSPICIOUS", verdictLabel:"MILEAGE ANOMALY",
+    receipt: {
+      merchant:"Mileage Reimbursement", date:"2024-09-30", time:"—", address:"Dubai — Abu Dhabi round trip",
+      items:[
+        {name:"Client visit: Abu Dhabi HQ (claimed 320km)", qty:1, price:248.00, flagged:false}
+      ],
+      subtotal:248.00, tax:0, tip:0, total:248.00, payment:"Mileage @ AED 0.775/km"
+    },
+    ai:{confidence:0.82, reasoning:"Mileage claim anomaly detected via geolocation + mapping validation. (1) Claimed distance: 320km round trip Dubai–Abu Dhabi. Actual driving distance (Google Maps): 264km. Overstated by 56km (21% padding). (2) Employee's calendar shows meeting from 10am-12pm at Abu Dhabi HQ — departure/return windows suggest no additional stops. (3) Benford's Law: this employee's last 8 mileage claims all start with digits 2 or 3, deviating from expected first-digit distribution (p < 0.02). (4) Behavioral flag: 40% higher average mileage claims than peer group in same role. Recommend GPS log cross-reference.",
+      rule:"MILEAGE_PADDING", signals:["21% distance overstatement","264km actual vs 320km claimed","No intermediate stops on calendar","Benford's Law violation (p<0.02)","40% above peer group average","Request GPS verification"]}
+  }
+];
+
+/* ===== RENDER TABLE ===== */
+const tbody = document.getElementById('claimsBody');
+
+function riskColor(score) {
+    if (score >= 80) return 'var(--red)';
+    if (score >= 60) return 'var(--orange)';
+    if (score >= 40) return 'var(--yellow)';
+    return 'var(--green)';
+}
+
+function flagBadge(flag) {
+    const map = {
+        'AI_GENERATED': ['badge-ai-gen', 'AI GENERATED'],
+        'DUPLICATE': ['badge-duplicate', 'DUPLICATE'],
+        'RESTRICTED_ITEM': ['badge-restricted', 'RESTRICTED'],
+        'POLICY_VIOLATION': ['badge-policy', 'POLICY'],
+        'SUSPICIOUS': ['badge-amount', 'SUSPICIOUS'],
+        'CLEAN': ['badge-ok', 'CLEAN'],
+    };
+    const [cls, label] = map[flag] || ['badge-amount', flag];
+    return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function verdictBadge(claim) {
+    const map = {
+        'FRAUD': 'badge-fraud',
+        'VIOLATION': 'badge-violation',
+        'SUSPICIOUS': 'badge-suspicious',
+        'CLEAN': 'badge-clean',
+    };
+    const cls = map[claim.verdict] || 'badge-review';
+    return `<span class="badge ${cls}">${claim.verdictLabel}</span>`;
+}
+
+function renderTable(data) {
+    tbody.innerHTML = data.map(c => `
+        <tr data-id="${c.id}" data-flag="${c.flag}" data-verdict="${c.verdict}">
+            <td class="mono">${c.id}</td>
+            <td>${c.employee}<br><span style="font-size:0.7rem;color:var(--text-muted)">${c.dept}</span></td>
+            <td>${c.merchant}</td>
+            <td>${c.category}</td>
+            <td class="mono">AED ${c.amount.toLocaleString('en',{minimumFractionDigits:2})}</td>
+            <td>${flagBadge(c.flag)}</td>
+            <td>
+                <div class="risk-bar-wrap">
+                    <div class="risk-bar"><div class="risk-bar-fill" style="width:${c.risk}%;background:${riskColor(c.risk)}"></div></div>
+                    <span class="risk-value" style="color:${riskColor(c.risk)}">${c.risk}</span>
+                </div>
+            </td>
+            <td>${verdictBadge(c)}</td>
+        </tr>
+    `).join('');
+
+    tbody.querySelectorAll('tr').forEach(tr => {
+        tr.addEventListener('click', () => openModal(tr.dataset.id));
+    });
+}
+
+renderTable(CLAIMS);
+
+/* ===== FILTERS ===== */
+document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const filter = pill.dataset.filter;
+        tbody.querySelectorAll('tr').forEach(tr => {
+            if (filter === 'all') {
+                tr.classList.remove('hidden');
+            } else {
+                tr.classList.toggle('hidden', tr.dataset.flag !== filter);
+            }
+        });
+    });
+});
+
+/* ===== SORTING ===== */
+let sortCol = null, sortAsc = true;
+document.querySelectorAll('thead th').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.dataset.sort;
+        if (!col) return;
+        if (sortCol === col) { sortAsc = !sortAsc; }
+        else { sortCol = col; sortAsc = true; }
+
+        const colMap = {id:0,employee:1,merchant:2,category:3,amount:4,flag:5,risk:6,verdict:7};
+        const idx = colMap[col];
+        if (idx === undefined) return;
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            let va = a.children[idx].textContent.trim();
+            let vb = b.children[idx].textContent.trim();
+            if (col === 'risk') { va = parseInt(va); vb = parseInt(vb); }
+            if (col === 'amount') { va = parseFloat(va.replace(/[^0-9.-]/g,'')); vb = parseFloat(vb.replace(/[^0-9.-]/g,'')); }
+            if (typeof va === 'number') return sortAsc ? va - vb : vb - va;
+            return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        });
+        rows.forEach(r => tbody.appendChild(r));
+
+        document.querySelectorAll('thead th .sort-arrow').forEach(a => a.textContent = '');
+        th.querySelector('.sort-arrow').textContent = sortAsc ? ' \u25B2' : ' \u25BC';
+    });
+});
+
+/* ===== MODAL ===== */
+const overlay = document.getElementById('modalOverlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+
+function openModal(claimId) {
+    const claim = CLAIMS.find(c => c.id === claimId);
+    if (!claim) return;
+
+    modalTitle.textContent = `${claim.id} — ${claim.employee}`;
+
+    const r = claim.receipt;
+    const ai = claim.ai;
+
+    const itemsHtml = r.items.map(item => {
+        const flagClass = item.flagged ? ' flagged' : '';
+        const flagTag = item.flagged ? '<span class="receipt-item-flag">RESTRICTED</span>' : '';
+        const total = (item.qty * item.price).toFixed(2);
+        return `<div class="receipt-item${flagClass}">
+            <span class="receipt-item-name">${item.name}${item.qty > 1 ? ' x'+item.qty : ''} ${flagTag}</span>
+            <span class="receipt-item-price">AED ${total}</span>
+        </div>`;
+    }).join('');
+
+    modalBody.innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-panel">
+                <div class="detail-panel-title">OCR — Scanned Receipt Data</div>
+                <div class="detail-field"><span class="detail-field-label">Merchant</span><span class="detail-field-value">${r.merchant}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Date</span><span class="detail-field-value">${r.date}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Time</span><span class="detail-field-value">${r.time}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Address</span><span class="detail-field-value">${r.address}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Payment</span><span class="detail-field-value">${r.payment}</span></div>
+                <div class="receipt-items">
+                    <div class="receipt-items-title">Itemized Line Items</div>
+                    ${itemsHtml}
+                    <div class="receipt-totals">
+                        <div class="receipt-total-row"><span>Subtotal</span><span class="mono">AED ${r.subtotal.toFixed(2)}</span></div>
+                        ${r.tax > 0 ? `<div class="receipt-total-row"><span>Tax (5% VAT)</span><span class="mono">AED ${r.tax.toFixed(2)}</span></div>` : ''}
+                        ${r.tip > 0 ? `<div class="receipt-total-row"><span>Tip</span><span class="mono">AED ${r.tip.toFixed(2)}</span></div>` : ''}
+                        <div class="receipt-total-row total"><span>Total</span><span class="mono">AED ${r.total.toFixed(2)}</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-panel">
+                <div class="detail-panel-title">Claim Details</div>
+                <div class="detail-field"><span class="detail-field-label">Claim ID</span><span class="detail-field-value mono">${claim.id}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Employee</span><span class="detail-field-value">${claim.employee}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Department</span><span class="detail-field-value">${claim.dept}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Category</span><span class="detail-field-value">${claim.category}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Amount</span><span class="detail-field-value ${claim.verdict === 'FRAUD' ? 'flag-highlight' : ''} mono">AED ${claim.amount.toFixed(2)}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Flag Type</span><span class="detail-field-value">${flagBadge(claim.flag)}</span></div>
+                <div class="detail-field"><span class="detail-field-label">Risk Score</span><span class="detail-field-value" style="color:${riskColor(claim.risk)};font-weight:700">${claim.risk}/100</span></div>
+                <div class="detail-field"><span class="detail-field-label">AI Verdict</span><span class="detail-field-value">${verdictBadge(claim)}</span></div>
+            </div>
+        </div>
+        <div class="ai-review">
+            <div class="ai-review-header">
+                <span class="ai-review-title">AI Fraud Analysis</span>
+                ${verdictBadge(claim)}
+            </div>
+            <div class="ai-meta">
+                <div class="ai-meta-item"><span class="ai-meta-label">Detection Rule:</span><span class="ai-meta-value">${ai.rule}</span></div>
+                <div class="ai-meta-item"><span class="ai-meta-label">Risk Score:</span><span class="ai-meta-value" style="color:${riskColor(claim.risk)}">${claim.risk}/100</span></div>
+            </div>
+            <div class="confidence-bar-wrap">
+                <span class="confidence-label">AI Confidence</span>
+                <div class="confidence-bar"><div class="confidence-bar-fill" style="width:${ai.confidence * 100}%"></div></div>
+                <span class="confidence-value">${Math.round(ai.confidence * 100)}%</span>
+            </div>
+            <div class="ai-reasoning">${ai.reasoning}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-weight:600;">Key Signals</div>
+            <div class="ai-signals">
+                ${ai.signals.map(s => {
+                    const isDanger = s.includes('FRAUD') || s.includes('ALCOHOL') || s.includes('TOBACCO') || s.includes('NICOTINE') || s.includes('rejection') || s.includes('investigation') || s.includes('RESTRICTED') || s.includes('Escalate') || s.includes('collusion');
+                    return `<span class="ai-signal${isDanger ? ' danger' : ''}">${s}</span>`;
+                }).join('')}
+            </div>
+        </div>
+    `;
+
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+window.closeModal = function() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+};
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ===== COUNTER ANIMATION ===== */
+document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseFloat(el.dataset.count);
+    const decimal = parseInt(el.dataset.decimal || '0');
+    const duration = 1200;
+    const start = performance.now();
+    function tick(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = (eased * target).toFixed(decimal);
+        if (progress < 1) requestAnimationFrame(tick);
+        else el.textContent = target.toFixed(decimal);
+    }
+    requestAnimationFrame(tick);
+});
+
+/* ===== PROCESS SHOWCASE ANIMATION ===== */
+let showcaseRunning = false;
+const $ = id => document.getElementById(id);
+
+function scDelay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function setProgress(pct) {
+    $('showcaseProgress').style.width = pct + '%';
+}
+function setStatus(text) {
+    $('showcaseStatus').textContent = text;
+}
+
+function resetShowcase() {
+    $('srcRow').classList.remove('visible');
+    ['src1','src2','src3','src4'].forEach(id => $(id).classList.remove('active'));
+    $('scFlow1').classList.remove('visible');
+    $('receiptCard').classList.remove('visible','flagged');
+    $('receiptBadge').textContent = 'SCANNING';
+    $('receiptBadge').classList.remove('fraud');
+    $('rcExif').textContent = 'Checking...';
+    $('rcExif').classList.remove('alert');
+    $('rcRegistry').textContent = 'Checking...';
+    $('rcRegistry').classList.remove('alert');
+    $('rcMerchant').classList.remove('alert');
+    $('scProcSteps').classList.remove('visible');
+    ['sps1','sps2','sps3','sps4','sps5','sps6'].forEach(id => { $(id).classList.remove('active','done','fail'); });
+    $('forensicRow').classList.remove('visible');
+    ['ff1','ff2','ff3','ff4','ff5'].forEach(id => { $(id).style.width = '0%'; });
+    ['fv1','fv2','fv3','fv4','fv5'].forEach(id => { $(id).innerHTML = '&mdash;'; });
+    $('scVerdictRow').classList.remove('visible');
+    setProgress(0);
+}
+
+window.runShowcase = async function() {
+    if (showcaseRunning) return;
+    showcaseRunning = true;
+    $('showcasePlay').disabled = true;
+    resetShowcase();
+    await scDelay(300);
+
+    // Step 1: Sources light up
+    setStatus('Connecting to expense management systems...');
+    setProgress(5);
+    $('srcRow').classList.add('visible');
+    await scDelay(500);
+    for (const id of ['src1','src2','src3','src4']) {
+        $(id).classList.add('active');
+        await scDelay(250);
+    }
+    setStatus('Ingesting 4,832 expense claims from all intake channels...');
+    setProgress(12);
+    await scDelay(800);
+
+    // Step 2: Flow connector
+    $('scFlow1').classList.add('visible');
+    setProgress(18);
+    await scDelay(500);
+
+    // Step 3: Receipt card appears
+    setStatus('New claim submitted: EXP-2024-0847 — Raj Mehta — AED 82.50');
+    setProgress(25);
+    $('receiptCard').classList.add('visible');
+    await scDelay(1000);
+
+    // Step 4: Processing steps
+    setStatus('Running 8-stage fraud detection pipeline...');
+    $('scProcSteps').classList.add('visible');
+    setProgress(30);
+    await scDelay(500);
+
+    // 4a: OCR Extract
+    $('sps1').classList.add('active');
+    setStatus('OCR + LLM: extracting structured fields from receipt image...');
+    setProgress(35);
+    await scDelay(600);
+    setStatus('OCR: "The Grand Kitchen" — 4 items — AED 82.50 — no tax line');
+    await scDelay(500);
+    $('sps1').classList.remove('active');
+    $('sps1').classList.add('done');
+
+    // 4b: Digital Forensics
+    $('sps2').classList.add('active');
+    setStatus('Digital forensics: analyzing pixel patterns and noise signatures...');
+    setProgress(42);
+    await scDelay(700);
+    setStatus('ALERT: Pixel-perfect uniformity detected — no paper texture variance');
+    await scDelay(600);
+    setStatus('Diffusion model artifact pattern found in background noise layer...');
+    await scDelay(700);
+    $('sps2').classList.remove('active');
+    $('sps2').classList.add('fail');
+
+    // 4c: EXIF Validate
+    $('sps3').classList.add('active');
+    setStatus('EXIF metadata validation: checking GPS, device ID, timestamp...');
+    setProgress(52);
+    await scDelay(600);
+    $('rcExif').textContent = 'ABSENT';
+    $('rcExif').classList.add('alert');
+    setStatus('CRITICAL: EXIF metadata completely absent — no device, GPS, or timestamp');
+    await scDelay(700);
+    $('sps3').classList.remove('active');
+    $('sps3').classList.add('fail');
+
+    // 4d: Merchant Check
+    $('sps4').classList.add('active');
+    setStatus('Merchant verification: querying commercial registry + Google Places...');
+    setProgress(62);
+    await scDelay(700);
+    $('rcRegistry').textContent = 'NOT FOUND';
+    $('rcRegistry').classList.add('alert');
+    $('rcMerchant').classList.add('alert');
+    setStatus('"The Grand Kitchen" — NOT FOUND in UAE commercial registry or Google Places');
+    await scDelay(800);
+    $('sps4').classList.remove('active');
+    $('sps4').classList.add('fail');
+
+    // 4e: AI-Fake Model
+    $('sps5').classList.add('active');
+    setStatus('AI-Fake Detection: running computer vision + digital fingerprint model...');
+    setProgress(72);
+    $('forensicRow').classList.add('visible');
+    await scDelay(500);
+
+    // Animate forensic scores
+    const forensics = [
+        {fill:'ff1', val:'fv1', pct:2, label:'0% VARIANCE'},
+        {fill:'ff2', val:'fv2', pct:0, label:'ABSENT'},
+        {fill:'ff3', val:'fv3', pct:0, label:'NOT FOUND'},
+        {fill:'ff4', val:'fv4', pct:98, label:'MATCH'},
+        {fill:'ff5', val:'fv5', pct:3, label:'SYNTHETIC'},
+    ];
+    for (const f of forensics) {
+        $(f.fill).style.width = f.pct + '%';
+        $(f.val).textContent = f.label;
+        await scDelay(400);
+    }
+    setStatus('Digital fingerprint matches known diffusion model receipt generation signature');
+    setProgress(82);
+    await scDelay(700);
+    setStatus('Font metrics synthetically perfect — real POS printers show measurable spacing variance');
+    await scDelay(600);
+    $('sps5').classList.remove('active');
+    $('sps5').classList.add('fail');
+
+    // Flag the receipt card
+    $('receiptCard').classList.add('flagged');
+    $('receiptBadge').textContent = 'AI-FAKE';
+    $('receiptBadge').classList.add('fraud');
+    setProgress(88);
+    await scDelay(400);
+
+    // 4f: Flag & Triage
+    $('sps6').classList.add('active');
+    setStatus('Auto-triage: AI-generated receipt → FRAUD → reject claim, escalate to compliance...');
+    setProgress(95);
+    await scDelay(800);
+    $('sps6').classList.remove('active');
+    $('sps6').classList.add('done');
+
+    // Step 5: Verdict
+    setProgress(100);
+    $('scVerdictRow').classList.add('visible');
+    setStatus('AED 82.50 fraudulent claim blocked — employee flagged for investigation');
+    await scDelay(500);
+
+    showcaseRunning = false;
+    $('showcasePlay').disabled = false;
+    $('showcasePlay').innerHTML = '&#8635; Replay';
+};
+
+})();
+</script>
+</body>
+</html>

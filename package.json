@@ -2,7 +2,7 @@
   "name": "hs-portfolio",
   "version": "1.0.0",
   "scripts": {
-    "start": "npx serve -s . -l 8080"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=20"
