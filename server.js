@@ -1,62 +1,49 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
 
 const PORT = process.env.PORT || 8080;
-const STATIC_DIR = path.join(__dirname, 'website');
 
 const mimeTypes = {
-  '.html': 'text/html',
-  '.css': 'text/css',
-  '.js': 'application/javascript',
-  '.json': 'application/json',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.pdf': 'application/pdf',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
+    ".html": "text/html",
+    ".css": "text/css",
+    ".js": "application/javascript",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+    ".pdf": "application/pdf",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+    ".ttf": "font/ttf"
 };
 
-http.createServer((req, res) => {
-  const urlPath = req.url.split('?')[0]; // strip query strings
-  let filePath = path.join(STATIC_DIR, urlPath === '/' ? 'index.html' : urlPath);
+const server = http.createServer((req, res) => {
+    let filePath = req.url === "/" ? "/index.html" : req.url;
+    filePath = path.join(__dirname, filePath);
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = mimeTypes[ext] || "application/octet-stream";
+    fs.readFile(filePath, (err, content) => {
+        if (err) {
+            if (err.code === "ENOENT") {
+                fs.readFile(path.join(__dirname, "index.html"), (err2, content2) => {
+                    res.writeHead(200, { "Content-Type": "text/html" });
+                    res.end(content2);
+                });
+            } else {
+                res.writeHead(500);
+                res.end("Server Error");
+            }
+        } else {
+            res.writeHead(200, { "Content-Type": contentType });
+            res.end(content);
+        }
+    });
+});
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      // SPA fallback — serve index.html for missing routes
-      fs.readFile(path.join(STATIC_DIR, 'index.html'), (e, fallback) => {
-        if (e) { res.writeHead(500); res.end('Server Error'); return; }
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(fallback);
-      });
-    } else {
-      const ext = path.extname(filePath);
-      res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
-      res.end(data);
-    }
-  });
-}).listen(PORT, () => console.log(`Serving /website on port ${PORT}`));
-```
-
-2. **Change the Startup command** in Azure Stack Settings to:
-```
-node server.js
-```
-
-3. Your project structure should look like:
-```
-/
-├── server.js          ← new file
-├── package-lock.json
-├── website/
-│   ├── index.html
-│   ├── demo.html
-│   ├── demos.html
-│   ├── reimbursement-demo.html
-│   ├── Himanshu_Suri_CV.pdf
-│   └── ...
-├── CV Himanshu Suri (1).pdf
-└── index.html
+server.listen(PORT, () => {
+    console.log("Server running on port " + PORT);
+});
