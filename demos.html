@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Demos — Himanshu Suri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        :root {
+            --primary: #00d4aa;
+            --primary-dim: #00d4aa30;
+            --secondary: #00b4d8;
+            --bg-card: #12121a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --glow: 0 0 20px #00d4aa40, 0 0 60px #00d4aa15;
+            --glow-strong: 0 0 30px #00d4aa60, 0 0 80px #00d4aa25;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        a { color: inherit; text-decoration: none; }
+        ::selection { background: #00d4aa40; color: #fff; }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0a0a0fdd;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #ffffff08;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .topbar-back {
+            color: var(--text-secondary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .topbar-back:hover {
+            color: #fff;
+            text-shadow: 0 0 8px var(--primary), 0 0 20px var(--primary), 0 0 40px #00d4aa60;
+        }
+        .topbar-back.glow {
+            color: #fff;
+            text-shadow: 0 0 12px var(--primary), 0 0 30px var(--primary), 0 0 60px #00d4aa80;
+            transform: scale(1.06);
+        }
+        .topbar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .topbar-badge {
+            padding: 0.25rem 0.8rem;
+            border: 1px solid var(--primary-dim);
+            border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--primary);
+        }
+
+        /* ===== MAIN ===== */
+        .demos-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        .demos-heading {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .demos-heading h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.8rem;
+        }
+        .demos-heading h1 span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .demos-heading p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.7;
+        }
+
+        /* ===== DEMO CARDS ===== */
+        .demo-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .demo-card {
+            background: var(--bg-card);
+            border: 1px solid #ffffff08;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        .demo-card:hover::before { transform: scaleX(1); }
+        .demo-card:hover {
+            border-color: var(--primary-dim);
+            box-shadow: var(--glow-strong);
+            transform: translateY(-6px);
+        }
+        .demo-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.2rem;
+        }
+        .demo-card h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+        }
+        .demo-card p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+        .demo-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1.5rem;
+        }
+        .demo-card-tag {
+            padding: 0.25rem 0.7rem;
+            background: #ffffff08;
+            border: 1px solid #ffffff0a;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .demo-card:hover .demo-card-tag {
+            border-color: var(--primary-dim);
+            color: var(--primary);
+        }
+        .demo-card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #0a0a0f;
+            transition: var(--transition);
+            align-self: flex-start;
+        }
+        .demo-card-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+        }
+        .demo-card-btn-arrow {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+        .demo-card:hover .demo-card-btn-arrow { transform: translateX(4px); }
+
+        /* ===== FOOTER ===== */
+        .demos-footer {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        .demos-footer span { color: var(--primary); font-weight: 600; }
+
+        @media (max-width: 700px) {
+            .demo-cards { grid-template-columns: 1fr; }
+            .demos-container { padding: 2rem 1rem; }
+            .topbar { padding: 0.6rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <a href="index.html" class="topbar-back" onclick="this.classList.add('glow');var t=this;setTimeout(function(){t.classList.remove('glow')},600)">&#8592; Himanshu Suri</a>
+        <span style="color:#ffffff15">|</span>
+        <span class="topbar-title">Live Demos</span>
+    </div>
+    <span class="topbar-badge">Interactive &bull; Dummy Data</span>
+</div>
+
+<!-- MAIN -->
+<div class="demos-container">
+    <div class="demos-heading">
+        <h1>Enterprise AI <span>Live Demos</span></h1>
+        <p>Interactive showcases of production-grade AI solutions I've built. All data is fabricated for demonstration — no proprietary information is exposed.</p>
+    </div>
+
+    <div class="demo-cards">
+        <!-- Invoice Duplicate Detection -->
+        <a href="demo.html" class="demo-card">
+            <div class="demo-card-icon">&#128196;</div>
+            <h2>Invoice Duplicate Detection</h2>
+            <p>AI-powered detection of duplicate invoices across AP systems — OCR-aware matching, cross-vendor fraud flagging, FX tolerance, and LLM forensic review with priority routing.</p>
+            <div class="demo-card-tags">
+                <span class="demo-card-tag">OCR Matching</span>
+                <span class="demo-card-tag">Cross-Vendor Fraud</span>
+                <span class="demo-card-tag">LLM Review</span>
+                <span class="demo-card-tag">5-Index Blocking</span>
+                <span class="demo-card-tag">FX Tolerance</span>
+            </div>
+            <span class="demo-card-btn">Explore Demo <span class="demo-card-btn-arrow">&#8594;</span></span>
+        </a>
+
+        <!-- Employee Reimbursement -->
+        <a href="reimbursement-demo.html" class="demo-card">
+            <div class="demo-card-icon">&#128206;</div>
+            <h2>Reimbursement Fraud Detection</h2>
+            <p>Automated screening of employee expense claims — AI-generated receipt detection, restricted item flagging (alcohol, tobacco), duplicate receipts, scanned bill analysis, and policy compliance.</p>
+            <div class="demo-card-tags">
+                <span class="demo-card-tag">AI Receipt Detection</span>
+                <span class="demo-card-tag">Restricted Items</span>
+                <span class="demo-card-tag">OCR Extraction</span>
+                <span class="demo-card-tag">Cross-Employee</span>
+                <span class="demo-card-tag">Amount Tampering</span>
+            </div>
+            <span class="demo-card-btn">Explore Demo <span class="demo-card-btn-arrow">&#8594;</span></span>
+        </a>
+    </div>
+
+    <div class="demos-footer">
+        Built by <span>Himanshu Suri</span> &bull; Senior AI Engineer &bull; These demos showcase solution architecture and AI capabilities using dummy data only.
+    </div>
+</div>
+
+</body>
+</html>
