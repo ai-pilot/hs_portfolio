@@ -195,7 +195,7 @@
         }
         .hero-domains {
             display: flex;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             gap: 0.5rem;
             justify-content: center;
             margin-bottom: 3rem;
@@ -809,8 +809,42 @@
         }
 
         @media (max-width: 480px) {
+            /* Hero */
+            .hero { height: auto; min-height: 450px; padding-top: 4rem; padding-bottom: 2rem; }
+            .hero-content { padding: 0 1rem; max-width: 100%; }
+            .hero-headline { font-size: clamp(1.5rem, 5vw, 2rem); }
+            .hero-name { font-size: clamp(1.2rem, 3vw, 1.6rem); }
+            .hero-subtitle { font-size: 0.9rem; }
+            .hero-domains { gap: 0.3rem; margin-bottom: 1.5rem; }
+            .hero-domain { font-size: 0.65rem; padding: 0.25rem 0.6rem; }
+            .hero-buttons { gap: 0.5rem; }
+            .scroll-indicator { display: none; }
+
+            /* Navbar */
+            .navbar { padding: 0.8rem 1rem; }
+            .navbar.scrolled { padding: 0.6rem 1rem; }
+
+            /* Sections */
+            section { padding: 2.5rem 1rem; }
+            .section-title { font-size: clamp(1.4rem, 4vw, 2rem); }
+            .about-grid { gap: 1.5rem; }
+
+            /* Stats */
             .stats-grid { grid-template-columns: 1fr; }
-            .agent-connector-arrows { gap: 1.5rem; }
+            .stat-number { font-size: 1.8rem; }
+            .stat-card { padding: 1rem 0.8rem; }
+
+            /* Architecture */
+            .arch-diagram { padding: 1.5rem 1rem; }
+            .arch-flow { flex-direction: column; min-width: auto; row-gap: 0.8rem; align-items: stretch; }
+            .arch-arrow { transform: rotate(90deg); padding: 0.3rem 0; }
+            .arch-node { width: 100%; min-width: auto; }
+            .arch-tab { padding: 0.8rem 1rem; font-size: 0.8rem; min-height: 40px; }
+            .agent-connector-arrows { gap: 1rem; }
+
+            /* Touch targets */
+            .btn { padding: 0.95rem 1.8rem; min-height: 44px; font-size: 0.9rem; }
+            .contact-link { padding: 1.2rem 1.5rem; min-height: 44px; }
         }
     </style>
 <script type="text/javascript">
@@ -904,10 +938,6 @@
             <div class="stat-card">
                 <div class="stat-number"><span data-target="8">0</span><span class="suffix">+</span></div>
                 <div class="stat-label">Years of Experience</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><span data-target="4">0</span></div>
-                <div class="stat-label">AI Engineers Led</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number"><span data-target="3">0</span></div>
@@ -1029,7 +1059,7 @@
                 <div class="timeline-company">DAMAC Properties, Dubai</div>
                 <div class="timeline-role">Senior Manager, Data Science & AI</div>
                 <ul>
-                    <li>Leading a team of 4 AI engineers delivering agentic AI solutions across sales, finance, and audit</li>
+                    <li>Delivering agentic AI solutions across sales, finance, and audit</li>
                     <li>Architected multi-agent validation systems using LangGraph for autonomous deal oversight and financial controls</li>
                     <li>Built enterprise RAG system with fine-tuned LLM (LoRA on Llama 3) serving as the company's centralized audit assistant</li>
                     <li>Designed forecasting models at unit-type granularity achieving single-digit MAPE, and probabilistic collection routing models improving recovery efficiency</li>
