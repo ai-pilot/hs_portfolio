@@ -379,13 +379,26 @@
             margin-bottom: 0.8rem;
         }
         .skill-card-tools {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.72rem;
-            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
             border-top: 1px solid #ffffff08;
             padding-top: 0.8rem;
         }
-        .skill-card:hover .skill-card-tools { color: var(--primary); }
+        .skill-card-tools span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--primary);
+            background: rgba(100, 255, 218, 0.06);
+            border: 1px solid rgba(100, 255, 218, 0.15);
+            padding: 0.2rem 0.55rem;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        .skill-card:hover .skill-card-tools span {
+            background: rgba(100, 255, 218, 0.12);
+            border-color: rgba(100, 255, 218, 0.3);
+        }
         .skills-hint {
             text-align: center;
             font-size: 0.75rem;
@@ -823,31 +836,31 @@
             <div class="skill-card-icon">&#129302;</div>
             <h3>Multi-Agent Systems</h3>
             <p>I build autonomous agent pipelines that replace manual workflows — deal validation, financial controls, and audit checks that run 24/7 without human intervention.</p>
-            <div class="skill-card-tools">LangGraph &middot; MCP &middot; A2A &middot; AWS Strands &middot; Autogen</div>
+            <div class="skill-card-tools"><span>LangGraph</span><span>MCP</span><span>A2A</span><span>AWS Strands</span><span>Autogen</span><span>CrewAI</span></div>
         </div>
         <div class="skill-card reveal">
             <div class="skill-card-icon">&#128269;</div>
             <h3>RAG Systems at Scale</h3>
             <p>Production RAG serving hundreds of users daily — parent-child chunking for financial docs, hybrid search with reranking, and guardrails that keep hallucination rates in single digits.</p>
-            <div class="skill-card-tools">Qdrant &middot; Hybrid Search &middot; Reranking &middot; NeMo Guardrails</div>
+            <div class="skill-card-tools"><span>Qdrant</span><span>ChromaDB</span><span>Hybrid Search</span><span>Reranking</span><span>NeMo Guardrails</span></div>
         </div>
         <div class="skill-card reveal">
             <div class="skill-card-icon">&#9881;</div>
             <h3>LLM Fine-Tuning</h3>
             <p>When off-the-shelf models don't cut it, I fine-tune. LoRA on Llama 3 for domain-specific audit tasks — turning a general model into a specialist that understands your business context.</p>
-            <div class="skill-card-tools">LoRA &middot; QLoRA &middot; Unsloth &middot; Llama &middot; Qwen</div>
+            <div class="skill-card-tools"><span>LoRA</span><span>QLoRA</span><span>Unsloth</span><span>Llama</span><span>Qwen</span><span>HuggingFace</span></div>
         </div>
         <div class="skill-card reveal">
             <div class="skill-card-icon">&#128200;</div>
-            <h3>ML & Forecasting</h3>
-            <p>From unit-level demand forecasting with single-digit MAPE to probabilistic models that route collections efficiently — ML that directly impacts the P&L.</p>
-            <div class="skill-card-tools">Python &middot; XGBoost &middot; Neural Networks &middot; Anomaly Detection</div>
+            <h3>ML & Computer Vision</h3>
+            <p>From unit-level demand forecasting with single-digit MAPE to computer vision pipelines and probabilistic models that route collections efficiently — ML that directly impacts the P&L.</p>
+            <div class="skill-card-tools"><span>Python</span><span>XGBoost</span><span>OpenCV</span><span>Neural Networks</span><span>Anomaly Detection</span><span>Scikit-learn</span></div>
         </div>
         <div class="skill-card reveal">
             <div class="skill-card-icon">&#127919;</div>
             <h3>AI Strategy & Delivery</h3>
             <p>I don't just build — I help companies figure out where AI actually matters. Use-case discovery, build vs buy decisions, and roadmaps that connect AI capabilities to business outcomes.</p>
-            <div class="skill-card-tools">Roadmapping &middot; ROI Frameworks &middot; Cross-Functional Delivery</div>
+            <div class="skill-card-tools"><span>Roadmapping</span><span>ROI Frameworks</span><span>Cross-Functional Delivery</span><span>Stakeholder Mgmt</span></div>
         </div>
     </div>
     <div class="skills-hint">&#8592; Swipe to explore &#8594;</div>
