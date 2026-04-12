@@ -304,11 +304,9 @@
         }
 
         /* ===== ABOUT ===== */
-        .about-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
+        .about-text {
+            max-width: 800px;
+            margin: 0 auto;
         }
         .about-text p {
             color: var(--text-secondary);
@@ -320,51 +318,31 @@
             color: var(--primary);
             font-weight: 600;
         }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid #ffffff08;
-            border-radius: 16px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            transition: var(--transition);
-        }
-        .stat-card:hover {
-            border-color: var(--primary-dim);
-            box-shadow: var(--glow);
-            transform: translateY(-4px);
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .stat-number .suffix { font-size: 1.5rem; }
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-        }
 
         /* ===== SKILLS ===== */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        /* ===== SIGNATURE SKILLS (horizontal scroll on mobile) ===== */
+        .skills-scroll {
+            display: flex;
             gap: 1.5rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 1rem 0 2rem;
+            scrollbar-width: none;
         }
+        .skills-scroll::-webkit-scrollbar { display: none; }
         .skill-card {
             background: var(--bg-card);
             border: 1px solid #ffffff08;
             border-radius: 16px;
-            padding: 2rem;
+            padding: 1.8rem;
             transition: var(--transition);
             position: relative;
             overflow: hidden;
+            min-width: 320px;
+            max-width: 380px;
+            flex-shrink: 0;
+            scroll-snap-align: start;
         }
         .skill-card::before {
             content: '';
@@ -384,41 +362,37 @@
             box-shadow: var(--glow);
             transform: translateY(-4px);
         }
-        .skill-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: var(--primary-dim);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
+        .skill-card-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
         }
         .skill-card h3 {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             color: var(--text-primary);
         }
-        .skill-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .skill-tag {
-            padding: 0.3rem 0.8rem;
-            background: #ffffff08;
-            border: 1px solid #ffffff0a;
-            border-radius: 6px;
-            font-size: 0.8rem;
+        .skill-card p {
+            font-size: 0.88rem;
             color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-            transition: var(--transition);
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
         }
-        .skill-card:hover .skill-tag {
-            border-color: var(--primary-dim);
-            color: var(--primary);
+        .skill-card-tools {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            border-top: 1px solid #ffffff08;
+            padding-top: 0.8rem;
+        }
+        .skill-card:hover .skill-card-tools { color: var(--primary); }
+        .skills-hint {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: -0.5rem;
+            display: none;
         }
 
         /* ===== TIMELINE ===== */
@@ -639,62 +613,6 @@
             gap: 4rem;
         }
 
-        /* ===== EDUCATION ===== */
-        .edu-card {
-            background: var(--bg-card);
-            border: 1px solid #ffffff08;
-            border-radius: 16px;
-            padding: 2.5rem;
-            max-width: 600px;
-            position: relative;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-        .edu-card:hover {
-            border-color: var(--primary-dim);
-            box-shadow: var(--glow);
-        }
-        .edu-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-        }
-        .edu-degree {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-        .edu-school {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.3rem;
-        }
-        .edu-year {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-        }
-        .edu-highlights {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .edu-highlight {
-            padding: 0.5rem 1rem;
-            background: var(--primary-dim);
-            border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--primary);
-            font-weight: 600;
-        }
-
         /* ===== CONTACT ===== */
         .contact-section {
             text-align: center;
@@ -766,10 +684,6 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 900px) {
-            .about-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
             .timeline::before { left: 1.5rem; }
             .timeline-item,
             .timeline-item:nth-child(even) {
@@ -800,11 +714,10 @@
             }
             .nav-links.open { right: 0; }
             .hamburger { display: flex; }
-            .skills-grid { grid-template-columns: 1fr; }
+            .skill-card { min-width: 280px; }
+            .skills-hint { display: block; }
             section { padding: 4rem 1.5rem; }
             .hero-content { padding: 0 1.5rem; }
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
-            .stat-card { padding: 1.5rem 1rem; }
             .contact-links { flex-direction: column; align-items: center; }
         }
 
@@ -827,12 +740,6 @@
             /* Sections */
             section { padding: 2.5rem 1rem; }
             .section-title { font-size: clamp(1.4rem, 4vw, 2rem); }
-            .about-grid { gap: 1.5rem; }
-
-            /* Stats */
-            .stats-grid { grid-template-columns: 1fr; }
-            .stat-number { font-size: 1.8rem; }
-            .stat-card { padding: 1rem 0.8rem; }
 
             /* Architecture */
             .arch-diagram { padding: 1.5rem 1rem; }
@@ -866,8 +773,8 @@
         <li><a href="#experience" onclick="closeNav()">Experience</a></li>
         <li><a href="#architecture" onclick="closeNav()">Architecture</a></li>
         <li><a href="demos.html" onclick="closeNav()">Live Demos</a></li>
-        <li><a href="#education" onclick="closeNav()">Education</a></li>
         <li><a href="#contact" onclick="closeNav()">Contact</a></li>
+        <li><a href="https://linkedin.com/in/suri-himanshu" target="_blank" rel="noopener" onclick="closeNav()" style="display:inline-flex;align-items:center;gap:4px">LinkedIn &#8599;</a></li>
     </ul>
     <div class="hamburger" id="hamburger" onclick="toggleNav()">
         <span></span><span></span><span></span>
@@ -904,142 +811,68 @@
     </div>
 </section>
 
+<!-- ===== SKILLS (moved above About for engagement) ===== -->
+<section id="skills">
+    <div class="reveal">
+        <p class="section-label">What I Do</p>
+        <h2 class="section-title">How I Solve Problems</h2>
+        <div class="section-divider"></div>
+    </div>
+    <div class="skills-scroll">
+        <div class="skill-card reveal">
+            <div class="skill-card-icon">&#129302;</div>
+            <h3>Multi-Agent Systems</h3>
+            <p>I build autonomous agent pipelines that replace manual workflows — deal validation, financial controls, and audit checks that run 24/7 without human intervention.</p>
+            <div class="skill-card-tools">LangGraph &middot; MCP &middot; A2A &middot; AWS Strands &middot; Autogen</div>
+        </div>
+        <div class="skill-card reveal">
+            <div class="skill-card-icon">&#128269;</div>
+            <h3>RAG Systems at Scale</h3>
+            <p>Production RAG serving hundreds of users daily — parent-child chunking for financial docs, hybrid search with reranking, and guardrails that keep hallucination rates in single digits.</p>
+            <div class="skill-card-tools">Qdrant &middot; Hybrid Search &middot; Reranking &middot; NeMo Guardrails</div>
+        </div>
+        <div class="skill-card reveal">
+            <div class="skill-card-icon">&#9881;</div>
+            <h3>LLM Fine-Tuning</h3>
+            <p>When off-the-shelf models don't cut it, I fine-tune. LoRA on Llama 3 for domain-specific audit tasks — turning a general model into a specialist that understands your business context.</p>
+            <div class="skill-card-tools">LoRA &middot; QLoRA &middot; Unsloth &middot; Llama &middot; Qwen</div>
+        </div>
+        <div class="skill-card reveal">
+            <div class="skill-card-icon">&#128200;</div>
+            <h3>ML & Forecasting</h3>
+            <p>From unit-level demand forecasting with single-digit MAPE to probabilistic models that route collections efficiently — ML that directly impacts the P&L.</p>
+            <div class="skill-card-tools">Python &middot; XGBoost &middot; Neural Networks &middot; Anomaly Detection</div>
+        </div>
+        <div class="skill-card reveal">
+            <div class="skill-card-icon">&#127919;</div>
+            <h3>AI Strategy & Delivery</h3>
+            <p>I don't just build — I help companies figure out where AI actually matters. Use-case discovery, build vs buy decisions, and roadmaps that connect AI capabilities to business outcomes.</p>
+            <div class="skill-card-tools">Roadmapping &middot; ROI Frameworks &middot; Cross-Functional Delivery</div>
+        </div>
+    </div>
+    <div class="skills-hint">&#8592; Swipe to explore &#8594;</div>
+</section>
+
 <!-- ===== ABOUT ===== -->
 <section id="about">
     <div class="reveal">
         <p class="section-label">About Me</p>
-        <h2 class="section-title">Building AI That Delivers Real Impact</h2>
+        <h2 class="section-title">The Engineer Behind the Systems</h2>
         <div class="section-divider"></div>
     </div>
-    <div class="about-grid">
-        <div class="about-text reveal">
-            <p>
-                I'm a <span class="highlight">Senior AI Engineer</span> with over 8 years of experience turning
-                ambitious ideas into production systems. My work sits at the intersection of cutting-edge AI
-                and practical business outcomes — where an agentic workflow isn't just a demo, it's the engine
-                behind a company's operations.
-            </p>
-            <p>
-                I've built solutions across <span class="highlight">Finance</span> (AR, AP, treasury, SOA management),
-                <span class="highlight">Procurement</span> (vendor contracts, duplicate detection, e-auctions),
-                <span class="highlight">Sales & Brokerage</span> (deal validation, fraud flagging, forecasting),
-                <span class="highlight">HR</span> (workforce analytics, retention modelling), and
-                <span class="highlight">Revenue Management</span> (pricing, elasticity, demand planning).
-            </p>
-            <p>
-                Currently based in <span class="highlight">Dubai</span>, I lead an AI engineering team
-                delivering agentic solutions — RAG systems with fine-tuned LLMs, multi-agent validation pipelines,
-                anomaly detection, and neural-network-powered forecasting. My background in
-                <span class="highlight">Financial Economics</span> means I don't just build models — I understand
-                the business context they serve.
-            </p>
-        </div>
-        <div class="stats-grid reveal">
-            <div class="stat-card">
-                <div class="stat-number"><span data-target="8">0</span><span class="suffix">+</span></div>
-                <div class="stat-label">Years of Experience</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><span data-target="3">0</span></div>
-                <div class="stat-label">Industries Served</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><span data-target="50">0</span><span class="suffix">+</span></div>
-                <div class="stat-label">Models Deployed</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ===== SKILLS ===== -->
-<section id="skills">
-    <div class="reveal">
-        <p class="section-label">Core Expertise</p>
-        <h2 class="section-title">What I Bring to the Table</h2>
-        <div class="section-divider"></div>
-    </div>
-    <div class="skills-grid">
-        <div class="skill-card reveal">
-            <div class="skill-icon">&#129302;</div>
-            <h3>Agentic Frameworks</h3>
-            <div class="skill-tags">
-                <span class="skill-tag">LangChain</span>
-                <span class="skill-tag">LangGraph</span>
-                <span class="skill-tag">AWS Strands</span>
-                <span class="skill-tag">Autogen</span>
-                <span class="skill-tag">MCP</span>
-                <span class="skill-tag">A2A Protocol</span>
-            </div>
-        </div>
-        <div class="skill-card reveal">
-            <div class="skill-icon">&#128269;</div>
-            <h3>RAG & Embeddings</h3>
-            <div class="skill-tags">
-                <span class="skill-tag">Vector DBs</span>
-                <span class="skill-tag">Hybrid Search</span>
-                <span class="skill-tag">Chunking</span>
-                <span class="skill-tag">Reranking</span>
-                <span class="skill-tag">Guardrails</span>
-                <span class="skill-tag">Qdrant</span>
-            </div>
-        </div>
-        <div class="skill-card reveal">
-            <div class="skill-icon">&#9881;</div>
-            <h3>Fine-Tuning</h3>
-            <div class="skill-tags">
-                <span class="skill-tag">LoRA</span>
-                <span class="skill-tag">QLoRA</span>
-                <span class="skill-tag">Unsloth</span>
-            </div>
-        </div>
-        <div class="skill-card reveal">
-            <div class="skill-icon">&#129504;</div>
-            <h3>AI Platforms</h3>
-            <div class="skill-tags">
-                <span class="skill-tag">OpenAI Model</span>
-                <span class="skill-tag">Foundry</span>
-                <span class="skill-tag">AWS Bedrock</span>
-                <span class="skill-tag">Claude API</span>
-                <span class="skill-tag">Llama</span>
-                <span class="skill-tag">Qwen</span>
-            </div>
-        </div>
-        <div class="skill-card reveal">
-            <div class="skill-icon">&#128200;</div>
-            <h3>ML & Deep Learning</h3>
-            <div class="skill-tags">
-                <span class="skill-tag">Python</span>
-                <span class="skill-tag">SQL</span>
-                <span class="skill-tag">Neural Networks</span>
-                <span class="skill-tag">Computer Vision</span>
-                <span class="skill-tag">XGBoost</span>
-                <span class="skill-tag">Scikit-learn</span>
-                <span class="skill-tag">Forecasting</span>
-                <span class="skill-tag">Anomaly Detection</span>
-            </div>
-        </div>
-        <div class="skill-card reveal">
-            <div class="skill-icon">&#127919;</div>
-            <h3>Enterprise AI Strategy</h3>
-            <div class="skill-tags">
-                <span class="skill-tag">AI Roadmapping</span>
-                <span class="skill-tag">Use-Case Discovery</span>
-                <span class="skill-tag">Build vs Buy</span>
-                <span class="skill-tag">ROI Frameworks</span>
-                <span class="skill-tag">Cross-Functional Delivery</span>
-            </div>
-        </div>
-        <div class="skill-card reveal">
-            <div class="skill-icon">&#128640;</div>
-            <h3>Deployment & BI</h3>
-            <div class="skill-tags">
-                <span class="skill-tag">Azure App Service</span>
-                <span class="skill-tag">Containers</span>
-                <span class="skill-tag">Kubernetes</span>
-                <span class="skill-tag">Power BI</span>
-                <span class="skill-tag">React</span>
-            </div>
-        </div>
+    <div class="about-text reveal">
+        <p>
+            8+ years turning ambitious ideas into production systems. Currently based in
+            <span class="highlight">Dubai</span>, I lead an AI engineering team at
+            <span class="highlight">DAMAC Properties</span> — building agentic solutions across
+            sales, finance, and audit that run autonomously every day.
+        </p>
+        <p>
+            My M.Sc. in <span class="highlight">Financial Economics</span> (Rank 2, GPA 9.4/10, Madras School of Economics) is my unfair advantage. I don't just build models — I understand
+            P&L impact, risk frameworks, and why a 2% improvement in collection routing
+            translates to millions in recovered revenue. That's the difference between
+            an AI demo and an AI system that a CFO trusts.
+        </p>
     </div>
 </section>
 
@@ -1330,23 +1163,6 @@
     </div>
 </section>
 
-<!-- ===== EDUCATION ===== -->
-<section id="education">
-    <div class="reveal">
-        <p class="section-label">Education</p>
-        <h2 class="section-title">Academic Foundation</h2>
-        <div class="section-divider"></div>
-    </div>
-    <div class="edu-card reveal">
-        <div class="edu-degree">M.Sc. Financial Economics</div>
-        <div class="edu-school">Madras School of Economics</div>
-        <div class="edu-year">2015 — 2017</div>
-        <div class="edu-highlights">
-            <span class="edu-highlight">Rank 2</span>
-            <span class="edu-highlight">GPA: 9.4 / 10</span>
-        </div>
-    </div>
-</section>
 
 <!-- ===== CONTACT ===== -->
 <section id="contact" class="contact-section">
@@ -1508,34 +1324,6 @@
     revealElements.forEach(el => revealObserver.observe(el));
 
     /* ===== COUNTER ANIMATION ===== */
-    const counters = document.querySelectorAll('[data-target]');
-    let counterStarted = false;
-    const counterObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !counterStarted) {
-                counterStarted = true;
-                counters.forEach(counter => {
-                    const target = +counter.getAttribute('data-target');
-                    const duration = 1500;
-                    const start = performance.now();
-                    function updateCounter(now) {
-                        const elapsed = now - start;
-                        const progress = Math.min(elapsed / duration, 1);
-                        // Ease out cubic
-                        const eased = 1 - Math.pow(1 - progress, 3);
-                        counter.textContent = Math.floor(eased * target);
-                        if (progress < 1) requestAnimationFrame(updateCounter);
-                        else counter.textContent = target;
-                    }
-                    requestAnimationFrame(updateCounter);
-                });
-            }
-        });
-    }, { threshold: 0.3 });
-
-    const statsSection = document.querySelector('.stats-grid');
-    if (statsSection) counterObserver.observe(statsSection);
-
     /* ===== ARCHITECTURE TABS ===== */
     window.switchTab = function(tab) {
         document.querySelectorAll('.arch-tab').forEach(t => t.classList.remove('active'));
@@ -1557,5 +1345,10 @@
 
 })();
 </script>
+
+<!-- Orient Express Chat Widget -->
+<script>window.ORIENT_EXPRESS_API = "";</script>
+<link rel="stylesheet" href="orient-express.css">
+<script src="orient-express.iife.js"></script>
 </body>
 </html>

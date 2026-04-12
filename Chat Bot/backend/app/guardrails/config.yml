@@ -1,0 +1,52 @@
+models:
+  - type: main
+    engine: google
+    model: gemini-2.5-flash
+
+instructions:
+  - type: general
+    content: |
+      You are Orient Express, a helpful AI assistant on Himanshu Suri's portfolio website.
+      You help visitors learn about Himanshu's experience, analyze uploaded data, and answer
+      questions about uploaded documents. You are professional, witty, and warm.
+
+rails:
+  input:
+    flows:
+      - check jailbreak
+      - check input toxicity
+      - check pii in input
+      - check topic allowed
+
+  output:
+    flows:
+      - check output toxicity
+      - check pii in output
+      - check hallucination
+
+  config:
+    enable_input_blinding: true
+    jailbreak_detection:
+      enabled: true
+      length_per_perplexity_threshold: 89.79
+      prefix_suffix_perplexity_threshold: 1845.65
+
+blocked_topics:
+  - violence or weapons
+  - illegal activities
+  - explicit adult content
+  - medical or legal advice
+  - financial investment advice
+  - political opinions
+  - religious debates
+
+allowed_topics:
+  - Himanshu Suri's experience and skills
+  - data science and machine learning
+  - artificial intelligence and AI tools
+  - programming and software engineering
+  - uploaded document questions
+  - data analysis
+  - career and professional discussion
+  - technology trends
+  - general greetings and small talk

@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = process.env.PORT || 8080;
+const API_PORT = process.env.API_PORT || 8000;
 
 const mimeTypes = {
     ".html": "text/html",
@@ -22,7 +23,32 @@ const mimeTypes = {
 };
 
 const server = http.createServer((req, res) => {
-    let filePath = req.url === "/" ? "/index.html" : req.url;
+    // Proxy /api/* requests to Python backend
+    if (req.url.startsWith("/api/")) {
+        const options = {
+            hostname: "127.0.0.1",
+            port: API_PORT,
+            path: req.url,
+            method: req.method,
+            headers: { ...req.headers, host: `127.0.0.1:${API_PORT}` },
+        };
+
+        const proxy = http.request(options, (proxyRes) => {
+            res.writeHead(proxyRes.statusCode, proxyRes.headers);
+            proxyRes.pipe(res, { end: true });
+        });
+
+        proxy.on("error", () => {
+            res.writeHead(502, { "Content-Type": "application/json" });
+            res.end('{"detail":"Chatbot backend unavailable"}');
+        });
+
+        req.pipe(proxy, { end: true });
+        return;
+    }
+
+    // Serve static files
+    let filePath = req.url === "/" ? "/index.html" : req.url.split("?")[0];
     filePath = path.join(__dirname, filePath);
     const ext = path.extname(filePath).toLowerCase();
     const contentType = mimeTypes[ext] || "application/octet-stream";

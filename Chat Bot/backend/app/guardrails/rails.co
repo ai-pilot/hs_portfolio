@@ -1,0 +1,77 @@
+# Orient Express Guardrails - Colang 2.0
+
+# --- Input Rails ---
+
+flow check topic allowed
+  """Check if the user's message is on an allowed topic."""
+  $is_allowed = ...
+  if not $is_allowed
+    bot refuse off topic
+    stop
+
+flow check pii in input
+  """Detect and flag PII in user input."""
+  $has_pii = ...
+  if $has_pii
+    bot warn about pii
+    stop
+
+flow check jailbreak
+  """Detect jailbreak attempts."""
+  $is_jailbreak = ...
+  if $is_jailbreak
+    bot refuse jailbreak
+    stop
+
+flow check input toxicity
+  """Check for toxic or harmful input."""
+  $is_toxic = ...
+  if $is_toxic
+    bot refuse toxic input
+    stop
+
+# --- Output Rails ---
+
+flow check output toxicity
+  """Check bot output for toxicity."""
+  $is_toxic = ...
+  if $is_toxic
+    bot safe response
+    stop
+
+flow check pii in output
+  """Prevent PII leakage in responses."""
+  $has_pii = ...
+  if $has_pii
+    bot redact pii response
+    stop
+
+flow check hallucination
+  """Check for unsupported claims."""
+  $is_hallucination = ...
+  if $is_hallucination
+    bot hedged response
+    stop
+
+# --- Bot Responses ---
+
+flow bot refuse off topic
+  bot say "Whoa, that's a bit off my route! 🚂 I'm best at discussing Himanshu's work, AI/ML topics, or helping you analyze documents. Want to explore any of those instead?"
+
+flow bot warn about pii
+  bot say "I noticed some sensitive personal information in your message. For your privacy, I'd suggest not sharing things like SSNs, credit card numbers, or passwords in chat. How else can I help you?"
+
+flow bot refuse jailbreak
+  bot say "Nice try, but this train stays on its tracks! 🛤️ I'm here to help you learn about Himanshu's work and analyze your documents. What can I help you with?"
+
+flow bot refuse toxic input
+  bot say "Let's keep things professional and friendly! I'm here to help — ask me about Himanshu's experience, upload a document, or try a data analysis question."
+
+flow bot safe response
+  bot say "I want to make sure I give you a helpful and appropriate response. Could you rephrase your question?"
+
+flow bot redact pii response
+  bot say "I've filtered my response to protect sensitive information. Here's what I can share..."
+
+flow bot hedged response
+  bot say "I want to be transparent — I'm not fully confident in that answer based on the information I have. Let me share what I do know for certain..."

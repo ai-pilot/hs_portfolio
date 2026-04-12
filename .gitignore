@@ -2,3 +2,9 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+.env
+Chat Bot/chroma_db/
+Chat Bot/frontend/dist/
+Chat Bot/frontend/node_modules/
+Chat Bot/backend/__pycache__/
+.claude/
