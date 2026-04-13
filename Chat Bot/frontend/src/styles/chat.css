@@ -914,6 +914,11 @@
     height: 52px;
   }
 
+  /* Hide floating bubble when chat is open on mobile — minimize button in header handles close */
+  .oe-widget:has(.oe-window) .oe-bubble {
+    display: none;
+  }
+
   .oe-message {
     max-width: 98%;
   }
