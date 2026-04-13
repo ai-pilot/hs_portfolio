@@ -17,7 +17,6 @@ const SUGGESTIONS = [
   "What projects has he built at DAMAC?",
   "What are his core skills?",
   "Explain RAG architecture",
-  "What's his education?",
 ];
 
 export default function ChatWindow({ apiBase, onClose, isFirstOpen }) {
