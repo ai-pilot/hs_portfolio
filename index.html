@@ -319,71 +319,86 @@
             font-weight: 600;
         }
 
-        /* ===== SKILLS ===== */
-        /* ===== SIGNATURE SKILLS (horizontal scroll on mobile) ===== */
+        /* ===== SKILLS (desktop grid · mobile horizontal scroll) ===== */
         .skills-scroll {
-            display: flex;
-            gap: 1.5rem;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
             padding: 1rem 0 2rem;
-            scrollbar-width: none;
         }
-        .skills-scroll::-webkit-scrollbar { display: none; }
         .skill-card {
-            background: var(--bg-card);
-            border: 1px solid #ffffff08;
-            border-radius: 16px;
-            padding: 1.8rem;
-            transition: var(--transition);
+            background: linear-gradient(180deg, #0e0e17 0%, #0a0a12 100%);
+            border: 1px solid #ffffff0a;
+            border-radius: 14px;
+            padding: 1.6rem 1.4rem 1.4rem;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
             position: relative;
             overflow: hidden;
-            min-width: 320px;
-            max-width: 380px;
-            flex-shrink: 0;
-            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
         }
         .skill-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.5s ease;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
         }
-        .skill-card:hover::before { transform: scaleX(1); }
+        .skill-card:hover::before { opacity: 1; }
         .skill-card:hover {
             border-color: var(--primary-dim);
-            box-shadow: var(--glow);
-            transform: translateY(-4px);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px -16px rgba(100, 255, 218, 0.25),
+                        0 0 0 1px rgba(100, 255, 218, 0.1);
         }
+        .skill-card-number {
+            position: absolute;
+            top: 1rem;
+            right: 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--primary);
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+        .skill-card:hover .skill-card-number { opacity: 1; }
         .skill-card-icon {
-            font-size: 1.8rem;
-            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            background: radial-gradient(circle at 30% 30%, rgba(100, 255, 218, 0.15), rgba(100, 255, 218, 0.03));
+            border: 1px solid rgba(100, 255, 218, 0.18);
+            color: var(--primary);
         }
+        .skill-card-icon svg { width: 24px; height: 24px; }
         .skill-card h3 {
             font-size: 1.05rem;
             font-weight: 700;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.5rem;
             color: var(--text-primary);
+            letter-spacing: -0.1px;
         }
         .skill-card p {
             font-size: 0.88rem;
             color: var(--text-secondary);
             line-height: 1.6;
-            margin-bottom: 0.8rem;
+            margin-bottom: 1rem;
+            flex-grow: 1;
         }
         .skill-card-tools {
             display: flex;
             flex-wrap: wrap;
             gap: 0.4rem;
             border-top: 1px solid #ffffff08;
-            padding-top: 0.8rem;
+            padding-top: 0.9rem;
         }
         .skill-card-tools span {
             font-family: 'JetBrains Mono', monospace;
@@ -401,11 +416,37 @@
         }
         .skills-hint {
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             margin-top: -0.5rem;
             display: none;
+        }
+
+        @media (max-width: 1100px) {
+            .skills-scroll { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .skills-scroll {
+                grid-template-columns: none;
+                display: flex;
+                gap: 1rem;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding: 1rem 0.25rem 1.5rem;
+                scrollbar-width: none;
+            }
+            .skills-scroll::-webkit-scrollbar { display: none; }
+            .skill-card {
+                min-width: 280px;
+                max-width: 320px;
+                flex-shrink: 0;
+                scroll-snap-align: start;
+            }
+            .skills-hint { display: block; }
         }
 
         /* ===== TIMELINE ===== */
@@ -560,11 +601,320 @@
             min-width: 110px;
             transition: var(--transition);
             position: relative;
+            cursor: pointer;
         }
         .arch-node:hover {
             border-color: var(--primary);
             box-shadow: var(--glow);
             transform: translateY(-3px);
+        }
+        .arch-node::after {
+            content: "?";
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: 0.65rem;
+            color: var(--primary);
+            opacity: 0.4;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+        }
+        .arch-node:hover::after { opacity: 1; }
+
+        /* ===== NEW RAG PIPELINE ===== */
+        .pipeline-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .legend-item { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .legend-dot[data-layer="ingest"]   { background: #38bdf8; box-shadow: 0 0 8px #38bdf880; }
+        .legend-dot[data-layer="retrieve"] { background: #c084fc; box-shadow: 0 0 8px #c084fc80; }
+        .legend-dot[data-layer="reason"]   { background: #fb923c; box-shadow: 0 0 8px #fb923c80; }
+        .legend-dot[data-layer="deliver"]  { background: #34d399; box-shadow: 0 0 8px #34d39980; }
+
+        .pipeline-rag {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            padding: 1rem 0.5rem 2rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+        }
+        .pipeline-rag::-webkit-scrollbar { height: 6px; }
+        .pipeline-rag::-webkit-scrollbar-track { background: transparent; }
+        .pipeline-rag::-webkit-scrollbar-thumb { background: #ffffff15; border-radius: 3px; }
+
+        .pipeline-stage {
+            --layer-color: var(--primary);
+            flex-shrink: 0;
+            width: 170px;
+            background: linear-gradient(180deg, #0e0e17 0%, #0a0a12 100%);
+            border: 1px solid #ffffff0a;
+            border-radius: 14px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            scroll-snap-align: start;
+            overflow: hidden;
+        }
+        .pipeline-stage[data-layer="ingest"]   { --layer-color: #38bdf8; }
+        .pipeline-stage[data-layer="retrieve"] { --layer-color: #c084fc; }
+        .pipeline-stage[data-layer="reason"]   { --layer-color: #fb923c; }
+        .pipeline-stage[data-layer="deliver"]  { --layer-color: #34d399; }
+        .pipeline-stage::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--layer-color), transparent);
+            opacity: 0.7;
+        }
+        .pipeline-stage::after {
+            content: '↗';
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 0.85rem;
+            color: var(--layer-color);
+            opacity: 0.3;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .pipeline-stage:hover {
+            transform: translateY(-4px);
+            border-color: color-mix(in srgb, var(--layer-color) 50%, transparent);
+            box-shadow: 0 12px 30px -10px color-mix(in srgb, var(--layer-color) 40%, transparent),
+                        0 0 0 1px color-mix(in srgb, var(--layer-color) 20%, transparent);
+        }
+        .pipeline-stage:hover::after {
+            opacity: 1;
+            transform: translate(2px, -2px);
+        }
+        .pipeline-stage-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 0.8rem;
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--layer-color) 10%, transparent);
+            color: var(--layer-color);
+            border: 1px solid color-mix(in srgb, var(--layer-color) 25%, transparent);
+        }
+        .pipeline-stage-icon svg { width: 22px; height: 22px; }
+        .pipeline-stage-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        .pipeline-stage-sub {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.3px;
+        }
+        .pipeline-stage-meta {
+            margin-top: 0.8rem;
+            padding-top: 0.7rem;
+            border-top: 1px dashed #ffffff0c;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .pipeline-stage-metric {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.66rem;
+            color: var(--layer-color);
+            opacity: 0.9;
+        }
+
+        .pipeline-connector {
+            flex-shrink: 0;
+            align-self: center;
+            width: 48px;
+            height: 2px;
+            position: relative;
+            background: linear-gradient(90deg, #ffffff10, #ffffff20, #ffffff10);
+            margin: 0 4px;
+        }
+        .pipeline-connector::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+            animation: pipeDot 3s cubic-bezier(0.4, 0.0, 0.6, 1) infinite;
+        }
+        @keyframes pipeDot {
+            0%   { left: 0%; opacity: 0; }
+            15%  { opacity: 1; }
+            85%  { opacity: 1; }
+            100% { left: calc(100% - 8px); opacity: 0; }
+        }
+
+        .pipeline-caption {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        /* Vertical pipeline (used by Multi-Agent panel) */
+        .pipeline-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 2rem 1rem 1rem;
+        }
+        .pipeline-vrow {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .pipeline-vconnector {
+            width: 2px;
+            height: 28px;
+            position: relative;
+            background: linear-gradient(180deg, #ffffff10, #ffffff20, #ffffff10);
+        }
+        .pipeline-vconnector::after {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+            animation: pipeDotV 3s cubic-bezier(0.4, 0.0, 0.6, 1) infinite;
+        }
+        @keyframes pipeDotV {
+            0%   { top: 0%; opacity: 0; }
+            15%  { opacity: 1; }
+            85%  { opacity: 1; }
+            100% { top: calc(100% - 8px); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .pipeline-rag {
+                padding: 0.5rem 0.5rem 1.5rem;
+            }
+            .pipeline-stage { width: 150px; padding: 1rem 0.8rem; }
+            .pipeline-connector { width: 28px; }
+            .pipeline-vrow { gap: 0.6rem; }
+        }
+
+        /* Info modal */
+        .info-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.2s ease;
+        }
+        .info-modal-overlay.open { display: flex; }
+        .info-modal {
+            background: linear-gradient(135deg, #0d0d14 0%, #12121a 100%);
+            border: 1px solid var(--primary-dim);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 520px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(100, 255, 218, 0.1);
+            position: relative;
+        }
+        .info-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+        .info-modal-close:hover {
+            color: var(--primary);
+            background: rgba(100, 255, 218, 0.08);
+        }
+        .info-modal-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .info-modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 1rem;
+        }
+        .info-modal-section {
+            margin-bottom: 1.2rem;
+        }
+        .info-modal-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.4rem;
+        }
+        .info-modal-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .info-modal-example {
+            background: rgba(100, 255, 218, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 0.9rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            font-style: italic;
+        }
+        @media (max-width: 480px) {
+            .info-modal { padding: 1.5rem; }
+            .info-modal-title { font-size: 1.15rem; }
         }
         .arch-node-icon {
             font-size: 1.5rem;
@@ -727,8 +1077,6 @@
             }
             .nav-links.open { right: 0; }
             .hamburger { display: flex; }
-            .skill-card { min-width: 280px; }
-            .skills-hint { display: block; }
             section { padding: 4rem 1.5rem; }
             .hero-content { padding: 0 1.5rem; }
             .contact-links { flex-direction: column; align-items: center; }
@@ -800,7 +1148,7 @@
     <div class="hero-content">
         <p class="hero-name">Himanshu Suri</p>
         <h1 class="hero-headline">I build <span class="gradient">enterprise AI solutions</span> across finance, procurement, sales &amp; beyond</h1>
-        <p class="hero-tagline">Senior AI Engineer &bull; RAG Systems &bull; Agentic Workflows &bull; MCP &bull; A2A</p>
+        <p class="hero-tagline">Senior AI Engineer &bull; RAG Systems &bull; Agentic Workflows</p>
         <p class="hero-subtitle">From autonomous financial controls and fraud detection to intelligent audit systems — I architect production-grade agentic systems and ML pipelines that drive real business outcomes.</p>
         <div class="hero-domains">
             <span class="hero-domain">Finance (AR, AP, Treasury)</span>
@@ -833,37 +1181,42 @@
     </div>
     <div class="skills-scroll">
         <div class="skill-card reveal">
-            <div class="skill-card-icon">&#129302;</div>
+            <span class="skill-card-number">01</span>
+            <div class="skill-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="12" cy="13" r="2.5"/><line x1="12" y1="7" x2="12" y2="10.5"/><line x1="10" y1="14.5" x2="6.5" y2="17.5"/><line x1="14" y1="14.5" x2="17.5" y2="17.5"/></svg></div>
             <h3>Multi-Agent Systems</h3>
-            <p>I build autonomous agent pipelines that replace manual workflows — deal validation, financial controls, and audit checks that run 24/7 without human intervention.</p>
+            <p>Autonomous agent pipelines that replace manual workflows — deal validation, financial controls, and audit checks that run without human intervention.</p>
             <div class="skill-card-tools"><span>LangGraph</span><span>MCP</span><span>A2A</span><span>AWS Strands</span><span>Autogen</span><span>CrewAI</span></div>
         </div>
         <div class="skill-card reveal">
-            <div class="skill-card-icon">&#128269;</div>
+            <span class="skill-card-number">02</span>
+            <div class="skill-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11" cy="15" r="2.5"/><line x1="13" y1="17" x2="15" y2="19"/></svg></div>
             <h3>RAG Systems at Scale</h3>
-            <p>Production RAG serving hundreds of users daily — parent-child chunking for financial docs, hybrid search with reranking, and guardrails that keep hallucination rates in single digits.</p>
-            <div class="skill-card-tools"><span>Qdrant</span><span>ChromaDB</span><span>Hybrid Search</span><span>Reranking</span><span>NeMo Guardrails</span></div>
+            <p>Production RAG systems for financial documents — parent–child chunking, hybrid retrieval with reranking, and guardrails that keep answers grounded in sources.</p>
+            <div class="skill-card-tools"><span>Qdrant</span><span>Azure AI Search</span><span>ChromaDB</span><span>Hybrid Search</span><span>Reranking</span><span>NeMo Guardrails</span></div>
         </div>
         <div class="skill-card reveal">
-            <div class="skill-card-icon">&#9881;</div>
+            <span class="skill-card-number">03</span>
+            <div class="skill-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2" fill="#0e0e17"/><circle cx="15" cy="12" r="2" fill="#0e0e17"/><circle cx="7" cy="17" r="2" fill="#0e0e17"/></svg></div>
             <h3>LLM Fine-Tuning</h3>
-            <p>When off-the-shelf models don't cut it, I fine-tune. LoRA on Llama 3 for domain-specific audit tasks — turning a general model into a specialist that understands your business context.</p>
+            <p>When off-the-shelf models don't fit, I fine-tune. LoRA and QLoRA on open models to turn a general LLM into a specialist that understands domain context.</p>
             <div class="skill-card-tools"><span>LoRA</span><span>QLoRA</span><span>Unsloth</span><span>Llama</span><span>Qwen</span><span>HuggingFace</span></div>
         </div>
         <div class="skill-card reveal">
-            <div class="skill-card-icon">&#128200;</div>
+            <span class="skill-card-number">04</span>
+            <div class="skill-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div>
             <h3>ML & Computer Vision</h3>
-            <p>From unit-level demand forecasting with single-digit MAPE to computer vision pipelines and probabilistic models that route collections efficiently — ML that directly impacts the P&L.</p>
+            <p>Demand forecasting at unit level, computer vision pipelines, and probabilistic models for routing and anomaly detection — ML that ties back to P&L.</p>
             <div class="skill-card-tools"><span>Python</span><span>XGBoost</span><span>OpenCV</span><span>Neural Networks</span><span>Anomaly Detection</span><span>Scikit-learn</span></div>
         </div>
         <div class="skill-card reveal">
-            <div class="skill-card-icon">&#127919;</div>
-            <h3>AI Strategy & Delivery</h3>
-            <p>I don't just build — I help companies figure out where AI actually matters. Use-case discovery, build vs buy decisions, and roadmaps that connect AI capabilities to business outcomes.</p>
+            <span class="skill-card-number">05</span>
+            <div class="skill-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><line x1="12" y1="3" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21"/><line x1="3" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21" y2="12"/></svg></div>
+            <h3>AI Strategy &amp; Delivery</h3>
+            <p>Beyond building, I help companies figure out where AI actually matters. Use-case discovery, build vs buy decisions, and roadmaps tied to business outcomes.</p>
             <div class="skill-card-tools"><span>Roadmapping</span><span>ROI Frameworks</span><span>Cross-Functional Delivery</span><span>Stakeholder Mgmt</span></div>
         </div>
     </div>
-    <div class="skills-hint">&#8592; Swipe to explore &#8594;</div>
+    <div class="skills-hint">Swipe to explore</div>
 </section>
 
 <!-- ===== ABOUT ===== -->
@@ -878,7 +1231,7 @@
             8+ years turning ambitious ideas into production systems. Currently based in
             <span class="highlight">Dubai</span>, I lead an AI engineering team at
             <span class="highlight">DAMAC Properties</span> — building agentic solutions across
-            sales, finance, and audit that run autonomously every day.
+            sales, finance, audit, and CRM that run autonomously every day.
         </p>
         <p>
             My M.Sc. in <span class="highlight">Financial Economics</span> (Rank 2, GPA 9.4/10, Madras School of Economics) is my unfair advantage. I don't just build models — I understand
@@ -905,7 +1258,8 @@
                 <div class="timeline-company">DAMAC Properties, Dubai</div>
                 <div class="timeline-role">Senior Manager, Data Science & AI</div>
                 <ul>
-                    <li>Delivering agentic AI solutions across sales, finance, and audit</li>
+                    <li>Delivering agentic AI solutions across sales, finance, audit, and CRM</li>
+                    <li>In CRM, worked on customer tickets, calls, and meeting data to surface service trends and route escalations faster</li>
                     <li>Architected multi-agent validation systems using LangGraph for autonomous deal oversight and financial controls</li>
                     <li>Built enterprise RAG system with fine-tuned LLM (LoRA on Llama 3) serving as the company's centralized audit assistant</li>
                     <li>Designed forecasting models at unit-type granularity achieving single-digit MAPE, and probabilistic collection routing models improving recovery efficiency</li>
@@ -959,220 +1313,248 @@
 
     <!-- RAG Pipeline -->
     <div class="arch-panel active reveal" id="panel-rag">
-        <div class="arch-diagram">
-            <div class="arch-flow">
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128196;</div>
-                    <div class="arch-node-label">Documents</div>
-                    <div class="arch-node-sub">PDF, DOCX, HTML</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#9986;</div>
-                    <div class="arch-node-label">Chunking</div>
-                    <div class="arch-node-sub">Parent-Child</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128290;</div>
-                    <div class="arch-node-label">Embeddings</div>
-                    <div class="arch-node-sub">BGE / OpenAI</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128451;</div>
-                    <div class="arch-node-label">Vector DB</div>
-                    <div class="arch-node-sub">Qdrant / AI Search</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128270;</div>
-                    <div class="arch-node-label">Hybrid Search</div>
-                    <div class="arch-node-sub">RRF Fusion</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128218;</div>
-                    <div class="arch-node-label">Reranking</div>
-                    <div class="arch-node-sub">BGE Reranker</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#129504;</div>
-                    <div class="arch-node-label">LLM</div>
-                    <div class="arch-node-sub">GPT-4 / Llama</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128737;</div>
-                    <div class="arch-node-label">Guardrails</div>
-                    <div class="arch-node-sub">NeMo</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128172;</div>
-                    <div class="arch-node-label">Response</div>
-                    <div class="arch-node-sub">Cited Answer</div>
-                </div>
+        <div class="pipeline-legend reveal">
+            <span class="legend-item"><span class="legend-dot" data-layer="ingest"></span>Ingest</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="retrieve"></span>Retrieve</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="reason"></span>Reason</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="deliver"></span>Deliver</span>
+        </div>
+
+        <div class="pipeline-rag reveal">
+            <div class="pipeline-stage" data-layer="ingest" onclick="openInfo('documents')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
+                <div class="pipeline-stage-label">Documents</div>
+                <div class="pipeline-stage-sub">PDF · DOCX · HTML</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">OCR fallback</span></div>
             </div>
-            <div class="arch-description">
-                <p>
-                    <strong>Production RAG with guardrails.</strong> Documents are processed through parent-child chunking
-                    for context preservation, embedded and indexed in a vector database. At query time, hybrid search
-                    (dense + sparse) with Reciprocal Rank Fusion retrieves candidates, which are reranked for precision.
-                    The LLM generates grounded responses with source citations, filtered through NeMo Guardrails
-                    for safety and relevance.
-                </p>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="ingest" onclick="openInfo('chunking')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
+                <div class="pipeline-stage-label">Chunking</div>
+                <div class="pipeline-stage-sub">Parent–Child</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">500w · 100w overlap</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="ingest" onclick="openInfo('embeddings')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+                <div class="pipeline-stage-label">Embeddings</div>
+                <div class="pipeline-stage-sub">BGE · OpenAI</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">1024–3072 dim</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="ingest" onclick="openInfo('vector-db')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+                <div class="pipeline-stage-label">Vector DB</div>
+                <div class="pipeline-stage-sub">Qdrant · AI Search</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">HNSW index</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="retrieve" onclick="openInfo('hybrid-search')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg></div>
+                <div class="pipeline-stage-label">Hybrid Search</div>
+                <div class="pipeline-stage-sub">Dense + BM25 · RRF</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">top-k = 50</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="retrieve" onclick="openInfo('reranking')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
+                <div class="pipeline-stage-label">Reranking</div>
+                <div class="pipeline-stage-sub">Cross-Encoder</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">→ top 5</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="reason" onclick="openInfo('llm')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0 0 8v1a4 4 0 0 0 8 0v-1a4 4 0 0 0 0-8V6a4 4 0 0 0-4-4z"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+                <div class="pipeline-stage-label">LLM</div>
+                <div class="pipeline-stage-sub">GPT-4o · Claude · Llama</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">cite-or-abstain</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="reason" onclick="openInfo('guardrails')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+                <div class="pipeline-stage-label">Guardrails</div>
+                <div class="pipeline-stage-sub">NeMo · Custom</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">PII · jailbreak</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('response')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg></div>
+                <div class="pipeline-stage-label">Response</div>
+                <div class="pipeline-stage-sub">Cited · Streamed</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">SSE · source refs</span></div>
             </div>
         </div>
+
+        <p class="pipeline-caption">Click any stage to see how it works and where it's used</p>
     </div>
 
     <!-- Multi-Agent System -->
     <div class="arch-panel" id="panel-agent">
-        <div class="arch-diagram">
-            <div class="agent-grid">
-                <div class="agent-row">
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128100;</div>
-                        <div class="arch-node-label">User Query</div>
-                        <div class="arch-node-sub">Natural Language</div>
-                    </div>
-                </div>
-                <div class="agent-connector">&#11015;</div>
-                <div class="agent-row">
-                    <div class="arch-node" style="border-color: var(--primary); box-shadow: var(--glow);">
-                        <div class="arch-node-icon">&#127891;</div>
-                        <div class="arch-node-label">Orchestrator</div>
-                        <div class="arch-node-sub">LangGraph Router</div>
-                    </div>
-                </div>
-                <div class="agent-connector">
-                    <div class="agent-connector-arrows">
-                        <span>&#11023;</span>
-                        <span>&#11015;</span>
-                        <span>&#11023;</span>
-                    </div>
-                </div>
-                <div class="agent-row">
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128269;</div>
-                        <div class="arch-node-label">Retriever</div>
-                        <div class="arch-node-sub">RAG Agent</div>
-                    </div>
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#9989;</div>
-                        <div class="arch-node-label">Validator</div>
-                        <div class="arch-node-sub">Rules Engine</div>
-                    </div>
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128202;</div>
-                        <div class="arch-node-label">Analyzer</div>
-                        <div class="arch-node-sub">ML Models</div>
-                    </div>
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128221;</div>
-                        <div class="arch-node-label">Reporter</div>
-                        <div class="arch-node-sub">Output Formatter</div>
-                    </div>
-                </div>
-                <div class="agent-connector">
-                    <div class="agent-connector-arrows">
-                        <span>&#11015;</span>
-                        <span>&#11015;</span>
-                        <span>&#11015;</span>
-                    </div>
-                </div>
-                <div class="agent-row">
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128230;</div>
-                        <div class="arch-node-label">Tools (MCP)</div>
-                        <div class="arch-node-sub">APIs, DB, Search</div>
-                    </div>
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128279;</div>
-                        <div class="arch-node-label">A2A Protocol</div>
-                        <div class="arch-node-sub">Agent-to-Agent</div>
-                    </div>
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128679;</div>
-                        <div class="arch-node-label">Guardrails</div>
-                        <div class="arch-node-sub">Safety Layer</div>
-                    </div>
-                    <div class="arch-node">
-                        <div class="arch-node-icon">&#128101;</div>
-                        <div class="arch-node-label">Human-in-Loop</div>
-                        <div class="arch-node-sub">Approval Gate</div>
-                    </div>
+        <div class="pipeline-legend reveal">
+            <span class="legend-item"><span class="legend-dot" data-layer="ingest"></span>Input</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="retrieve"></span>Orchestrate</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="reason"></span>Workers</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="deliver"></span>Govern</span>
+        </div>
+
+        <div class="pipeline-vertical reveal">
+            <div class="pipeline-vrow">
+                <div class="pipeline-stage" data-layer="ingest" onclick="openInfo('user-query')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                    <div class="pipeline-stage-label">User Query</div>
+                    <div class="pipeline-stage-sub">Natural Language</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">session · auth</span></div>
                 </div>
             </div>
-            <div class="arch-description">
-                <p>
-                    <strong>Agentic orchestration with LangGraph.</strong> A central orchestrator routes tasks to specialized
-                    agents — each with its own tools and context. Tools are exposed via <strong>MCP (Model Context Protocol)</strong>
-                    for standardized tool integration, while <strong>A2A (Agent-to-Agent)</strong> protocol enables
-                    inter-agent communication across systems. The Retriever handles knowledge queries via RAG, the
-                    Validator enforces business rules, the Analyzer runs ML models, and the Reporter formats outputs.
-                    A human-in-the-loop gate ensures critical decisions get reviewed, while guardrails maintain safety boundaries throughout.
-                </p>
+
+            <div class="pipeline-vconnector"></div>
+
+            <div class="pipeline-vrow">
+                <div class="pipeline-stage" data-layer="retrieve" onclick="openInfo('orchestrator')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg></div>
+                    <div class="pipeline-stage-label">Orchestrator</div>
+                    <div class="pipeline-stage-sub">LangGraph Router</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">stateful flow</span></div>
+                </div>
+            </div>
+
+            <div class="pipeline-vconnector"></div>
+
+            <div class="pipeline-vrow">
+                <div class="pipeline-stage" data-layer="reason" onclick="openInfo('retriever')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                    <div class="pipeline-stage-label">Retriever</div>
+                    <div class="pipeline-stage-sub">RAG Agent</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">cited context</span></div>
+                </div>
+                <div class="pipeline-stage" data-layer="reason" onclick="openInfo('validator')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                    <div class="pipeline-stage-label">Validator</div>
+                    <div class="pipeline-stage-sub">Rules Engine</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">pass / fail · rule id</span></div>
+                </div>
+                <div class="pipeline-stage" data-layer="reason" onclick="openInfo('analyzer')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg></div>
+                    <div class="pipeline-stage-label">Analyzer</div>
+                    <div class="pipeline-stage-sub">ML Models</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">score · SHAP</span></div>
+                </div>
+                <div class="pipeline-stage" data-layer="reason" onclick="openInfo('reporter')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+                    <div class="pipeline-stage-label">Reporter</div>
+                    <div class="pipeline-stage-sub">Output Formatter</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">MD · JSON · email</span></div>
+                </div>
+            </div>
+
+            <div class="pipeline-vconnector"></div>
+
+            <div class="pipeline-vrow">
+                <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('tools-mcp')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 2 22"/><path d="M7 2v5"/><path d="M2 7h5"/><path d="M22 17v5"/><path d="M17 22h5"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></div>
+                    <div class="pipeline-stage-label">Tools (MCP)</div>
+                    <div class="pipeline-stage-sub">APIs · DB · Search</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">typed schemas</span></div>
+                </div>
+                <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('a2a-protocol')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+                    <div class="pipeline-stage-label">A2A Protocol</div>
+                    <div class="pipeline-stage-sub">Agent-to-Agent</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">trace id · typed</span></div>
+                </div>
+                <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('guardrails')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+                    <div class="pipeline-stage-label">Guardrails</div>
+                    <div class="pipeline-stage-sub">Safety Layer</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">PII · policy</span></div>
+                </div>
+                <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('human-in-loop')">
+                    <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></div>
+                    <div class="pipeline-stage-label">Human-in-Loop</div>
+                    <div class="pipeline-stage-sub">Approval Gate</div>
+                    <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">audit log</span></div>
+                </div>
             </div>
         </div>
+
+        <p class="pipeline-caption">Click any stage to see how it works and where it's used</p>
     </div>
 
     <!-- ML Pipeline -->
     <div class="arch-panel" id="panel-ml">
-        <div class="arch-diagram">
-            <div class="arch-flow">
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128450;</div>
-                    <div class="arch-node-label">Data Sources</div>
-                    <div class="arch-node-sub">ERP, Lake, APIs</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128295;</div>
-                    <div class="arch-node-label">Feature Eng.</div>
-                    <div class="arch-node-sub">Transform & Select</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#129518;</div>
-                    <div class="arch-node-label">Training</div>
-                    <div class="arch-node-sub">XGBoost / NN</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128203;</div>
-                    <div class="arch-node-label">Evaluation</div>
-                    <div class="arch-node-sub">CV, MAPE, AUC</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128230;</div>
-                    <div class="arch-node-label">Container</div>
-                    <div class="arch-node-sub">Docker / K8s</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#9729;</div>
-                    <div class="arch-node-label">Deploy</div>
-                    <div class="arch-node-sub">Azure / AWS</div>
-                </div>
-                <div class="arch-arrow">&#10132;</div>
-                <div class="arch-node">
-                    <div class="arch-node-icon">&#128200;</div>
-                    <div class="arch-node-label">Monitor</div>
-                    <div class="arch-node-sub">Drift & Alerts</div>
-                </div>
+        <div class="pipeline-legend reveal">
+            <span class="legend-item"><span class="legend-dot" data-layer="ingest"></span>Ingest</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="retrieve"></span>Transform</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="reason"></span>Train</span>
+            <span class="legend-item"><span class="legend-dot" data-layer="deliver"></span>Ship</span>
+        </div>
+
+        <div class="pipeline-rag reveal">
+            <div class="pipeline-stage" data-layer="ingest" onclick="openInfo('data-sources')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+                <div class="pipeline-stage-label">Data Sources</div>
+                <div class="pipeline-stage-sub">ERP · Lake · APIs</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">batch + stream</span></div>
             </div>
-            <div class="arch-description">
-                <p>
-                    <strong>End-to-end ML lifecycle.</strong> Data is ingested from enterprise systems, transformed through
-                    feature engineering pipelines, and used to train models (XGBoost, neural networks). Rigorous evaluation
-                    with cross-validation and business-relevant metrics ensures quality. Models are containerized with Docker,
-                    deployed to cloud infrastructure (Azure/AWS), and continuously monitored for data drift and performance degradation.
-                </p>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="retrieve" onclick="openInfo('feature-eng')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+                <div class="pipeline-stage-label">Feature Eng.</div>
+                <div class="pipeline-stage-sub">Transform · Select</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">feature store</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="reason" onclick="openInfo('training')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V2"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/></svg></div>
+                <div class="pipeline-stage-label">Training</div>
+                <div class="pipeline-stage-sub">XGBoost · NN</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">MLflow tracked</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="reason" onclick="openInfo('evaluation')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-4"/><rect x="9" y="3" width="6" height="8" rx="1"/><line x1="7" y1="15" x2="11" y2="15"/><line x1="7" y1="18" x2="15" y2="18"/></svg></div>
+                <div class="pipeline-stage-label">Evaluation</div>
+                <div class="pipeline-stage-sub">CV · MAPE · AUC</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">time-aware splits</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('container')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+                <div class="pipeline-stage-label">Container</div>
+                <div class="pipeline-stage-sub">Docker · FastAPI</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">versioned artifact</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('deploy')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div>
+                <div class="pipeline-stage-label">Deploy</div>
+                <div class="pipeline-stage-sub">Azure · AWS · K8s</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">canary rollout</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+
+            <div class="pipeline-stage" data-layer="deliver" onclick="openInfo('monitor')">
+                <div class="pipeline-stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+                <div class="pipeline-stage-label">Monitor</div>
+                <div class="pipeline-stage-sub">Drift · Alerts</div>
+                <div class="pipeline-stage-meta"><span class="pipeline-stage-metric">retrain trigger</span></div>
             </div>
         </div>
+
+        <p class="pipeline-caption">Click any stage to see how it works and where it's used</p>
     </div>
 </section>
 
@@ -1199,6 +1581,27 @@
         </a>
     </div>
 </section>
+
+<!-- ===== ARCHITECTURE INFO MODAL ===== -->
+<div class="info-modal-overlay" id="infoModalOverlay" onclick="closeInfo(event)">
+    <div class="info-modal" onclick="event.stopPropagation()">
+        <button class="info-modal-close" onclick="closeInfo()" aria-label="Close">&times;</button>
+        <div class="info-modal-icon" id="infoModalIcon"></div>
+        <div class="info-modal-title" id="infoModalTitle"></div>
+        <div class="info-modal-section">
+            <div class="info-modal-label">What it is</div>
+            <div class="info-modal-text" id="infoModalWhat"></div>
+        </div>
+        <div class="info-modal-section">
+            <div class="info-modal-label">In practice</div>
+            <div class="info-modal-example" id="infoModalExample"></div>
+        </div>
+        <div class="info-modal-section">
+            <div class="info-modal-label">Tech stack</div>
+            <div class="info-modal-text" id="infoModalTech"></div>
+        </div>
+    </div>
+</div>
 
 <!-- ===== FOOTER ===== -->
 <footer>
@@ -1336,7 +1739,6 @@
 
     revealElements.forEach(el => revealObserver.observe(el));
 
-    /* ===== COUNTER ANIMATION ===== */
     /* ===== ARCHITECTURE TABS ===== */
     window.switchTab = function(tab) {
         document.querySelectorAll('.arch-tab').forEach(t => t.classList.remove('active'));
@@ -1344,6 +1746,209 @@
         document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
         document.getElementById(`panel-${tab}`).classList.add('active');
     };
+
+    /* ===== ARCHITECTURE INFO MODAL ===== */
+    const ARCH_INFO = {
+        'documents': {
+            icon: '📄',
+            title: 'Documents',
+            what: 'The raw source material the system retrieves from — contracts, policies, reports, statements. Parsed into clean text with structure preserved (headings, tables, lists) so downstream stages can reason about it reliably.',
+            example: 'A team uploads a policy document. The parser extracts clean text per page and keeps the section/clause hierarchy intact, so a question about a specific clause can be traced back to its source.',
+            tech: 'pdfplumber, python-docx, PyMuPDF for structured parsing · Tesseract / Azure Document Intelligence for OCR on scanned PDFs · Unstructured.io for mixed-format ingestion.'
+        },
+        'chunking': {
+            icon: '✂',
+            title: 'Chunking',
+            what: 'Splitting parsed documents into smaller passages so retrieval can surface the snippet that answers a query, rather than feeding the whole document to the model. Boundary, size, and overlap choices drive retrieval quality.',
+            example: 'A long policy is split into sentence-aware passages with a small overlap. A question about a specific rule retrieves the passages that contain that rule, instead of a summary of the whole document.',
+            tech: 'Recursive character splitter with sentence-boundary awareness · Parent–child strategy that keeps a small retrievable chunk linked to a larger context window · LangChain / LlamaIndex splitters.'
+        },
+        'embeddings': {
+            icon: '🔢',
+            title: 'Embeddings',
+            what: 'A vector representation of each chunk that captures its meaning. Chunks with similar meanings end up close together, so retrieval can match on intent rather than exact keyword overlap.',
+            example: '"Late payment fee" and "overdue penalty charge" are worded differently but sit near each other in embedding space, so a query about one can surface chunks about the other.',
+            tech: 'BGE-large, OpenAI text-embedding-3-large, Cohere embed-v3, Voyage · typical dimensions 1024–3072 · optional domain fine-tuning for specialist vocabularies.'
+        },
+        'vector-db': {
+            icon: '🗄',
+            title: 'Vector Database',
+            what: 'A store built for similarity search over embeddings. Given a query vector it returns the nearest chunks quickly, usually via an approximate nearest-neighbor index like HNSW or IVF.',
+            example: 'When a user asks a question, the database returns the top few most relevant chunks fast enough to sit inside an interactive chat response path.',
+            tech: 'Qdrant (self-hosted) · Azure AI Search (managed) · ChromaDB (local / prototyping) · pgvector (inside Postgres) · HNSW indexing.'
+        },
+        'hybrid-search': {
+            icon: '🔍',
+            title: 'Hybrid Search',
+            what: 'Running dense (vector) and sparse (keyword / BM25) retrieval in parallel, then merging the ranked lists. Captures both semantic intent and exact-term precision — useful when queries include identifiers, amounts, or dates.',
+            example: 'A query for a specific metric or period — vector search surfaces related context, keyword search locks onto the exact term. Merging both catches chunks where either signal is strong.',
+            tech: 'Reciprocal Rank Fusion (RRF) to merge rankings · Elasticsearch / OpenSearch for BM25 · Qdrant hybrid query API · tunable weights per query type.'
+        },
+        'reranking': {
+            icon: '📊',
+            title: 'Reranking',
+            what: 'A second-stage cross-encoder that re-scores the initial candidate set for true relevance. Trades a little extra compute for better precision at the top of the list.',
+            example: 'Initial retrieval returns a broad candidate set; the reranker jointly scores each chunk against the query and promotes the ones that actually answer it.',
+            tech: 'BGE-reranker-large · Cohere Rerank · Jina reranker · cross-encoder models, optionally fine-tuned on domain pairs.'
+        },
+        'llm': {
+            icon: '🧠',
+            title: 'Language Model',
+            what: 'The generative model that turns retrieved context into a natural-language answer. In RAG it is prompted to stay grounded in the provided chunks and cite sources, rather than lean on pre-training.',
+            example: 'Given retrieved clauses from a policy, the model answers the user\'s question using only those clauses and cites them — or says the context doesn\'t cover it, instead of guessing.',
+            tech: 'GPT-4o, Claude Sonnet, Gemini 2.5 for hosted workloads · Llama 3, Qwen 2.5, Mistral for on-prem · prompts designed to enforce citation-or-abstain.'
+        },
+        'guardrails': {
+            icon: '🛡',
+            title: 'Guardrails',
+            what: 'A validation layer around the model that checks inputs and outputs against safety, domain, and compliance rules — blocking prompt injection, redacting PII, and constraining output format.',
+            example: 'A prompt-injection attempt is detected on the input side and routed to a safe fallback. On the output side, a response missing required citations is rejected and regenerated.',
+            tech: 'NeMo Guardrails (Colang) · Guardrails AI with Pydantic schemas · regex + classifier hybrids · output-schema validation for structured responses.'
+        },
+        'response': {
+            icon: '💬',
+            title: 'Response',
+            what: 'The final answer returned to the user — streamed for responsiveness, formatted with inline citations back to the source, optionally with follow-up suggestions.',
+            example: 'The answer streams in with inline references to the exact clauses it drew from, so the user can verify each statement instead of trusting it blindly.',
+            tech: 'Server-Sent Events (SSE) for streaming · citation linking back to source chunks · structured JSON output for downstream systems.'
+        },
+        /* ===== Multi-Agent System ===== */
+        'user-query': {
+            icon: '👤',
+            title: 'User Query',
+            what: 'The entry point — a natural-language question or instruction from the user. Captured as-is and passed to the orchestrator, which decides how to handle it.',
+            example: 'A user asks "flag any deals this week that missed the approval chain." The orchestrator parses intent and hands off to the right worker agents.',
+            tech: 'Chat interface (React / web widget) · REST or WebSocket entry point · session and auth context attached to the request.'
+        },
+        'orchestrator': {
+            icon: '🧭',
+            title: 'Orchestrator',
+            what: 'The central router that reads the user intent and decides which worker agents to call, in what order, and whether results need validation before returning. Owns the overall flow and state.',
+            example: 'For a compliance question it may call the retriever first, then the validator, then the reporter. For a quick status query it may skip straight to the analyzer.',
+            tech: 'LangGraph for stateful multi-step flows · state machine with typed nodes · AWS Strands · Autogen · CrewAI depending on use case.'
+        },
+        'retriever': {
+            icon: '🔍',
+            title: 'Retriever Agent',
+            what: 'A specialised agent that handles knowledge lookups over the document corpus. Wraps the full RAG pipeline (chunking, embeddings, vector search, reranking) behind a single callable interface.',
+            example: 'When the orchestrator needs a policy reference, it calls the retriever with the query and gets back grounded, cited context.',
+            tech: 'Internally runs the RAG pipeline described in the first tab · callable by the orchestrator as a tool.'
+        },
+        'validator': {
+            icon: '✅',
+            title: 'Validator Agent',
+            what: 'Enforces business rules, approval thresholds, and policy checks against structured inputs. Keeps deterministic logic out of the LLM and in code, where it can be audited and tested.',
+            example: 'Given a proposed deal, the validator checks it against rules (approval chain, discount caps, required fields) and returns pass/fail with the specific rule that fired.',
+            tech: 'Python rules engine · Pydantic schemas · condition tables sourced from business owners · unit-tested independently of the LLM.'
+        },
+        'analyzer': {
+            icon: '📊',
+            title: 'Analyzer Agent',
+            what: 'Calls the ML models for numeric reasoning — forecasts, classifications, anomaly flags. Wraps model inference so the agent layer gets a clean answer without dealing with feature construction.',
+            example: 'The orchestrator asks for collection risk on an account; the analyzer loads the right features and returns a risk score with the top contributing factors.',
+            tech: 'Scikit-learn / XGBoost / PyTorch behind a serving interface · SHAP for feature attributions · feature store lookup.'
+        },
+        'reporter': {
+            icon: '📝',
+            title: 'Reporter Agent',
+            what: 'Formats the final output for the channel it is going to — a chat reply, an email, a ticket, or a structured payload for another system. Keeps formatting logic separate from reasoning.',
+            example: 'The same underlying result is turned into a short chat answer for the user, a longer email for the manager, and a JSON payload for the downstream ticketing system.',
+            tech: 'Templated formatters · Markdown / HTML / JSON output modes · tone and length parameters per channel.'
+        },
+        'tools-mcp': {
+            icon: '🔌',
+            title: 'Tools (MCP)',
+            what: 'External capabilities — databases, APIs, search, code execution — exposed to the agents through the Model Context Protocol. MCP gives a standard way to describe and call tools, instead of hardcoding each integration.',
+            example: 'The analyzer calls an internal API for account data through an MCP tool definition, instead of the agent code carrying API client logic for every service.',
+            tech: 'Model Context Protocol (MCP) servers · tool schemas with typed inputs/outputs · wraps internal APIs, SQL, search, and file access.'
+        },
+        'a2a-protocol': {
+            icon: '🔗',
+            title: 'A2A Protocol',
+            what: 'Agent-to-Agent messaging — a structured way for agents to hand off tasks to each other across systems, with shared context, trace IDs, and typed messages rather than free-form text.',
+            example: 'The orchestrator hands a subtask to a specialist agent running elsewhere; both sides see the same trace ID and structured state, so the handoff is auditable.',
+            tech: 'Typed message envelopes · shared session / trace IDs · async queue or direct call depending on deployment.'
+        },
+        'human-in-loop': {
+            icon: '🧑‍⚖️',
+            title: 'Human-in-Loop',
+            what: 'An approval gate for high-impact actions. The agent pauses, surfaces the proposed action and its reasoning, and waits for a human decision before proceeding.',
+            example: 'Before an agent writes back to a system of record — e.g. adjusting a record or sending a customer notification — the change is shown to an owner for sign-off.',
+            tech: 'Approval UI backed by the orchestrator state · typed "pending approval" state in LangGraph · audit log of approver, timestamp, and decision.'
+        },
+        /* ===== ML Pipeline ===== */
+        'data-sources': {
+            icon: '🗃',
+            title: 'Data Sources',
+            what: 'Where the raw data lives — ERPs, data lakes, warehouses, event streams, and third-party APIs. The pipeline starts by ingesting and landing this into a consistent, queryable form.',
+            example: 'Transactional data from the ERP, behavioural events from the app, and reference data from a third-party API are ingested and joined on stable keys.',
+            tech: 'Azure Data Lake / Synapse · Databricks / Snowflake · ADF / Airflow for orchestration · SQL and Parquet as landing formats.'
+        },
+        'feature-eng': {
+            icon: '🔧',
+            title: 'Feature Engineering',
+            what: 'Turning raw fields into model-ready features — aggregations, time windows, categorical encodings, ratios, lags. Most of the real signal in a model comes from this step, not from the choice of algorithm.',
+            example: 'For a collections model: rolling payment behaviour windows, ageing buckets, customer-level aggregates, and interaction-level flags — consistent between training and scoring.',
+            tech: 'pandas / Spark transforms · feature store so the same definition is used in training and scoring · versioned feature definitions.'
+        },
+        'training': {
+            icon: '🧪',
+            title: 'Training',
+            what: 'Fitting the model on the engineered features. Choice of algorithm depends on the problem — gradient boosting for tabular, neural nets for sequence or vision tasks, simpler regressions where explainability matters more than accuracy.',
+            example: 'An XGBoost model is trained on historical behaviour to rank accounts by likelihood of paying within a target window. A baseline linear model is kept alongside for sanity checks.',
+            tech: 'XGBoost / LightGBM for tabular · PyTorch for deep nets · scikit-learn pipelines · experiment tracking with MLflow.'
+        },
+        'evaluation': {
+            icon: '📋',
+            title: 'Evaluation',
+            what: 'Measuring the model against honest, business-relevant metrics — not just raw accuracy. Uses cross-validation and holdouts that reflect how the model will actually be used in production.',
+            example: 'A forecast is judged on MAPE at the cut that matters to planning; a classifier is judged on precision at the top-decile, because that\'s where it gets acted on.',
+            tech: 'Cross-validation with time-aware splits · MAPE, AUC, precision@k · SHAP for feature attributions · backtests on a recent holdout.'
+        },
+        'container': {
+            icon: '📦',
+            title: 'Container',
+            what: 'Packaging the trained model and its serving code into a reproducible container so it runs the same in dev, test, and production. Pins dependencies and inference code together.',
+            example: 'The model and its preprocessing are built into a Docker image with a small FastAPI wrapper, so the same artifact can be tested locally and shipped to the cluster.',
+            tech: 'Docker image with pinned dependencies · FastAPI / Flask wrapper for inference · tagged by model version and training run.'
+        },
+        'deploy': {
+            icon: '☁',
+            title: 'Deploy',
+            what: 'Making the model available as a service — either as an online endpoint behind an API, or as a batch job that scores on a schedule. Includes auth, scaling, and rollout strategy.',
+            example: 'The containerised model is deployed as a REST endpoint with authentication and autoscaling. A canary routes a small share of traffic to a new version before full rollout.',
+            tech: 'Azure ML / AKS · AWS SageMaker · Kubernetes with HPA · canary or blue/green rollout patterns.'
+        },
+        'monitor': {
+            icon: '📈',
+            title: 'Monitor',
+            what: 'Watching the model in production for data drift, performance decay, and integration errors. Triggers retraining or alerts when the inputs or outputs move outside expected ranges.',
+            example: 'Feature distributions are tracked over time; when they drift beyond a threshold, the model is flagged for retraining instead of silently degrading.',
+            tech: 'Evidently / WhyLabs for drift · Prometheus / Grafana for service metrics · scheduled retraining jobs · owner alerts on SLO breaches.'
+        }
+    };
+
+    window.openInfo = function(key) {
+        const data = ARCH_INFO[key];
+        if (!data) return;
+        document.getElementById('infoModalIcon').textContent = data.icon;
+        document.getElementById('infoModalTitle').textContent = data.title;
+        document.getElementById('infoModalWhat').textContent = data.what;
+        document.getElementById('infoModalExample').textContent = data.example;
+        document.getElementById('infoModalTech').textContent = data.tech;
+        document.getElementById('infoModalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeInfo = function(e) {
+        if (e && e.target.id !== 'infoModalOverlay' && e.type === 'click' && e.currentTarget !== e.target) return;
+        document.getElementById('infoModalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+    };
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') window.closeInfo();
+    });
 
     /* ===== SMOOTH SCROLL FOR ANCHOR LINKS ===== */
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
